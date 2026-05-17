@@ -14,7 +14,6 @@ func main() {
 	}
 
 	fmt.Println("Listening on :8080")
-	defer ln.Close()
 
 	for {
 		// 接続確率
