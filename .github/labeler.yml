@@ -1,0 +1,59 @@
+cron-scheduler:
+  - changed-files:
+    - any-glob-to-any-file: 'crafts/cron-scheduler/**'
+
+distributed-cache:
+  - changed-files:
+    - any-glob-to-any-file: 'crafts/distributed-cache/**'
+
+http-server:
+  - changed-files:
+    - any-glob-to-any-file: 'crafts/http-server/**'
+
+kafka-clone:
+  - changed-files:
+    - any-glob-to-any-file: 'crafts/kafka-clone/**'
+
+rate-limiter:
+  - changed-files:
+    - any-glob-to-any-file: 'crafts/rate-limiter/**'
+
+react-mini-jotai:
+  - changed-files:
+    - any-glob-to-any-file: 'crafts/react-mini-jotai/**'
+
+react-mini-valtio:
+  - changed-files:
+    - any-glob-to-any-file: 'crafts/react-mini-valtio/**'
+
+react-mini-xstate:
+  - changed-files:
+    - any-glob-to-any-file: 'crafts/react-mini-xstate/**'
+
+react-mini-zustand:
+  - changed-files:
+    - any-glob-to-any-file: 'crafts/react-mini-zustand/**'
+
+redis-clone:
+  - changed-files:
+    - any-glob-to-any-file: 'crafts/redis-clone/**'
+
+reverse-proxy:
+  - changed-files:
+    - any-glob-to-any-file: 'crafts/reverse-proxy/**'
+
+search-engine:
+  - changed-files:
+    - any-glob-to-any-file: 'crafts/search-engine/**'
+
+typescript-mini-zod:
+  - changed-files:
+    - any-glob-to-any-file: 'crafts/typescript-mini-zod/**'
+
+url-shortener:
+  - changed-files:
+    - any-glob-to-any-file: 'crafts/url-shortener/**'
+
+websocket-broker:
+  - changed-files:
+    - any-glob-to-any-file: 'crafts/websocket-broker/**'
