@@ -45,18 +45,22 @@ func handleConn(conn net.Conn) {
 
 		// 送られている場合は、表示
 		if n > 0 {
-			fmt.Printf("n: %v\n", string(buf[:n]))
+			fmt.Println("request:")
+			fmt.Printf("%v", string(buf[:n]))
+			fmt.Println("====================")
 		}
 
 		// 接続終了の場合は表示して、break
 		if err == io.EOF {
 			fmt.Printf("connect close add: %v\n", add)
+			fmt.Println("====================")
 			break
 		}
 
 		// errがある場合は break
 		if err != nil {
 			fmt.Printf("add: %v, read err: %v\n", add, err)
+			fmt.Println("====================")
 			break
 		}
 	}
