@@ -1,3 +1,13 @@
+lang:go:
+  - changed-files:
+    - any-glob-to-any-file: '**/*.go'
+
+lang:typescript:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.ts'
+      - '**/*.tsx'
+
 cron-scheduler:
   - changed-files:
     - any-glob-to-any-file: 'crafts/cron-scheduler/**'
