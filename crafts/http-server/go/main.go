@@ -25,7 +25,7 @@ func main() {
 		}
 		fmt.Printf("conn: %v\n", conn)
 
-		handleConn(conn)
+		go handleConn(conn)
 	}
 }
 
