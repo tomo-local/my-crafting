@@ -35,6 +35,7 @@ func handleConn(conn net.Conn) {
 	// addの取得
 	add := conn.RemoteAddr()
 	fmt.Printf("add: %v\n", add)
+	fmt.Println("====================")
 
 	// 空のメモリを用意
 	buf := make([]byte, 4096)
@@ -44,7 +45,7 @@ func handleConn(conn net.Conn) {
 
 		// 送られている場合は、表示
 		if n > 0 {
-			fmt.Printf("n: %v\n", buf[:n])
+			fmt.Printf("n: %v\n", string(buf[:n]))
 		}
 
 		// 接続終了の場合は表示して、break
