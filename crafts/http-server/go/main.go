@@ -19,7 +19,8 @@ func main() {
 		// 接続確率
 		conn, err := ln.Accept()
 		if err != nil {
-			log.Fatal(err)
+			fmt.Printf("accept error: %v\n", err)
+			continue
 		}
 		fmt.Printf("conn: %v\n", conn)
 
