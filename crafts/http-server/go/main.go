@@ -42,7 +42,7 @@ func handleConn(conn net.Conn) {
 			fmt.Printf("%v", string(buf[:n]))
 			fmt.Println("====================")
 
-			rl, err := parseRequest(buf)
+			rl, err := parseRequest(buf[:n])
 			if err != nil {
 				fmt.Printf("error: %v\r\n", err)
 			}
