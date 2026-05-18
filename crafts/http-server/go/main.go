@@ -58,7 +58,13 @@ func handleConn(conn net.Conn) {
 				"\r\n" +
 				body
 
-			conn.Write([]byte(response))
+			_, err := conn.Write([]byte(response))
+
+			if err != nil {
+				log.Fatal(err)
+				break
+			}
+
 		}
 
 		// 接続終了の場合は表示して、break
