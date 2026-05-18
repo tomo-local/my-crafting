@@ -61,7 +61,7 @@ func handleConn(conn net.Conn) {
 			_, err := conn.Write([]byte(response))
 
 			if err != nil {
-				log.Fatal(err)
+				fmt.Printf("write err: %v\r\n add:%v", err, add)
 				break
 			}
 
