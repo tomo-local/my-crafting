@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"strings"
 
 	"github.com/tomo-local/http-server/internal/server"
 )
@@ -41,18 +42,37 @@ func handleConn(conn net.Conn) {
 			fmt.Printf("%v", string(buf[:n]))
 			fmt.Println("====================")
 
-			body := "Hello, World!\r\n" + string(buf[:n]) + "\r\n"
+			rl, err := parseRequest(buf[:n])
+			if err != nil {
+				fmt.Printf("error: %v\r\n", err)
+			}
+
+			var status, body string
+			switch rl.Path {
+			case "/":
+				status = "200 OK"
+				body = "Welcome!"
+			case "/about":
+				status = "200 OK"
+				body = "About Path"
+			default:
+				status = "404 Not Found"
+				body = "Not Found"
+			}
+
+			body += "\r\n" +
+				string(buf[:n])
 
 			// 特定の形式に変更する
-			response := "HTTP/1.1 200 OK\r\n" +
+			response := "HTTP/1.1 " + status + "\r\n" +
 				"Content-Length: " + strconv.Itoa(len(body)) + "\r\n" +
 				"\r\n" +
 				body
 
-			_, err := conn.Write([]byte(response))
+			_, err = conn.Write([]byte(response))
 
 			if err != nil {
-				fmt.Printf("write err: %v\r\n add:%v", err, add)
+				fmt.Printf("write err: %v\r\n", err)
 				break
 			}
 
@@ -72,4 +92,25 @@ func handleConn(conn net.Conn) {
 			break
 		}
 	}
+}
+
+type Request struct {
+	Method  string
+	Path    string
+	Version string
+}
+
+func parseRequest(buf []byte) (Request, error) {
+	lines := strings.Split(string(buf), "\r\n")
+	fields := strings.Fields(lines[0])
+	//1行目は、 Method, Path, Http Versionの3種類
+	if len(fields) != 3 {
+		return Request{}, fmt.Errorf("invalid request line: %q", lines[0])
+	}
+
+	return Request{
+		Method:  fields[0],
+		Path:    fields[1],
+		Version: fields[2],
+	}, nil
 }
