@@ -6,27 +6,18 @@ import (
 	"log"
 	"net"
 	"strconv"
+
+	"github.com/tomo-local/http-server/internal/server"
 )
 
 func main() {
 	// サーバーの立ち上げ
-	ln, err := net.Listen("tcp", ":8080")
+	srv := server.NewServer(":8080", handleConn)
+
+	err := srv.Start()
+
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	fmt.Println("Listening on :8080")
-
-	for {
-		// 接続確率
-		conn, err := ln.Accept()
-		if err != nil {
-			fmt.Printf("accept error: %v\n", err)
-			continue
-		}
-		fmt.Printf("conn: %v\n", conn)
-
-		go handleConn(conn)
 	}
 }
 
