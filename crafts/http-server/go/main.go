@@ -56,7 +56,7 @@ func handleConn(conn net.Conn) {
 				status = "200 OK"
 				body = "About Path"
 			default:
-				status = "400 Not Found"
+				status = "404 Not Found"
 				body = "Not Found"
 			}
 
@@ -64,7 +64,7 @@ func handleConn(conn net.Conn) {
 				string(buf[:n])
 
 			// 特定の形式に変更する
-			response := "HTTP/1.1" + status + "\r\n" +
+			response := "HTTP/1.1 " + status + "\r\n" +
 				"Content-Length: " + strconv.Itoa(len(body)) + "\r\n" +
 				"\r\n" +
 				body
