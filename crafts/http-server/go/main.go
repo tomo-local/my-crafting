@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"strconv"
 )
 
 func main() {
@@ -48,6 +49,22 @@ func handleConn(conn net.Conn) {
 			fmt.Println("request:")
 			fmt.Printf("%v", string(buf[:n]))
 			fmt.Println("====================")
+
+			body := "Hello, World!\r\n" + string(buf[:n]) + "\r\n"
+
+			// 特定の形式に変更する
+			response := "HTTP/1.1 200 OK\r\n" +
+				"Content-Length: " + strconv.Itoa(len(body)) + "\r\n" +
+				"\r\n" +
+				body
+
+			_, err := conn.Write([]byte(response))
+
+			if err != nil {
+				fmt.Printf("write err: %v\r\n add:%v", err, add)
+				break
+			}
+
 		}
 
 		// 接続終了の場合は表示して、break
