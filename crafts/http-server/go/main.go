@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"strconv"
@@ -23,11 +24,24 @@ func main() {
 
 func handleRequest(req request.Request, conn net.Conn) {
 	var status, body string
-	switch req.Path {
-	case "/":
+	switch {
+	case req.Method == "POST" && req.ContentLength <= 0:
+		status = "400 Bad Request"
+		body = "missing body"
+	case req.Method == "POST" && req.Path == "/echo":
+		buf := make([]byte, req.ContentLength)
+		if _, err := io.ReadFull(req.Body, buf); err != nil {
+			fmt.Printf("err: %v", err)
+			status = "500 Internal Server Error"
+			body = "failed to read body"
+			break
+		}
+		status = "200 OK"
+		body = string(buf)
+	case req.Path == "/":
 		status = "200 OK"
 		body = "Welcome!"
-	case "/about":
+	case req.Path == "/about":
 		status = "200 OK"
 		body = "About Path"
 	default:
