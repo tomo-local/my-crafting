@@ -9,11 +9,11 @@
 | トピック | 言語 | 状態 |
 |---------|------|------|
 | [HTTP サーバー](../crafts/http-server) | Go | ✅ |
-| [typescript-mini-zod](../crafts/typescript-mini-zod) | TypeScript | 完了 |
-| [react-mini-zustand](../crafts/react-mini-zustand) | TypeScript | 完了 |
-| [react-mini-jotai](../crafts/react-mini-jotai) | TypeScript | 完了 |
-| [react-mini-xstate](../crafts/react-mini-xstate) | TypeScript | 完了 |
-| [react-mini-valtio](../crafts/react-mini-valtio) | TypeScript | 完了 |
+| [typescript-mini-zod](../crafts/typescript-mini-zod) | TypeScript | ✅ |
+| [react-mini-zustand](../crafts/react-mini-zustand) | TypeScript | ✅ |
+| [react-mini-jotai](../crafts/react-mini-jotai) | TypeScript | ✅ |
+| [react-mini-xstate](../crafts/react-mini-xstate) | TypeScript | ✅ |
+| [react-mini-valtio](../crafts/react-mini-valtio) | TypeScript | ✅ |
 | [Redis クローン](../crafts/redis-clone) | Go | 予定 |
 | [Kafka クローン（メッセージブローカー）](../crafts/kafka-clone) | Go | 予定 |
 | [リバースプロキシ / ロードバランサー](../crafts/reverse-proxy) | Go | 予定 |

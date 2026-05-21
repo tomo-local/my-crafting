@@ -11,11 +11,11 @@ Each topic is organized by directory and may include multiple language implement
 | Topic | Languages | Status |
 |-------|-----------|--------|
 | [HTTP Server](./crafts/http-server) | Go | ✅ |
-| [typescript-mini-zod](./crafts/typescript-mini-zod) | TypeScript | Done |
-| [react-mini-zustand](./crafts/react-mini-zustand) | TypeScript | Done |
-| [react-mini-jotai](./crafts/react-mini-jotai) | TypeScript | Done |
-| [react-mini-xstate](./crafts/react-mini-xstate) | TypeScript | Done |
-| [react-mini-valtio](./crafts/react-mini-valtio) | TypeScript | Done |
+| [typescript-mini-zod](./crafts/typescript-mini-zod) | TypeScript | ✅ |
+| [react-mini-zustand](./crafts/react-mini-zustand) | TypeScript | ✅ |
+| [react-mini-jotai](./crafts/react-mini-jotai) | TypeScript | ✅ |
+| [react-mini-xstate](./crafts/react-mini-xstate) | TypeScript | ✅ |
+| [react-mini-valtio](./crafts/react-mini-valtio) | TypeScript | ✅ |
 | [Redis Clone](./crafts/redis-clone) | Go | Planned |
 | [Kafka Clone](./crafts/kafka-clone) | Go | Planned |
 | [Reverse Proxy / Load Balancer](./crafts/reverse-proxy) | Go | Planned |
