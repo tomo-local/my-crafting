@@ -36,7 +36,7 @@ func handleRequest(req request.Request, conn net.Conn) {
 			body = "failed to read body"
 			break
 		}
-		status = "200"
+		status = "200 OK"
 		body = string(buf)
 	case req.Path == "/":
 		status = "200 OK"

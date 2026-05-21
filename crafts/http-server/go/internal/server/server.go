@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"log"
@@ -57,8 +58,9 @@ func (s *Server) ServeConn(conn net.Conn) {
 	log.Printf("addr: %v\n", addr)
 	fmt.Println("====================")
 
+	reader := bufio.NewReader(conn)
 	for {
-		req, err := request.Parse(conn)
+		req, err := request.Parse(reader)
 		if err == io.EOF {
 			log.Printf("connect close add: %v\n", addr)
 			printSeparator(30)
@@ -72,8 +74,7 @@ func (s *Server) ServeConn(conn net.Conn) {
 			break
 		}
 
-		log.Println("request:")
-		fmt.Println(req)
+		log.Printf("request: %s %s %s\n", req.Method, req.Path, req.Version)
 
 		s.handler(req, conn)
 	}

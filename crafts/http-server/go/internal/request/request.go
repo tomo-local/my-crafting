@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"net"
 	"strconv"
 	"strings"
 )
@@ -17,8 +16,11 @@ type Request struct {
 	Body          io.Reader
 }
 
-func Parse(conn net.Conn) (Request, error) {
-	reader := bufio.NewReader(conn)
+func Parse(r io.Reader) (Request, error) {
+	reader, ok := r.(*bufio.Reader)
+	if !ok {
+		reader = bufio.NewReader(r)
+	}
 
 	line, err := reader.ReadString('\n')
 	if err != nil {
@@ -27,7 +29,7 @@ func Parse(conn net.Conn) (Request, error) {
 
 	fields := strings.Fields(strings.TrimRight(line, "\r\n"))
 	if len(fields) < 2 {
-		return Request{}, fmt.Errorf("invalid request line: %q", line[0])
+		return Request{}, fmt.Errorf("invalid request line: %q", line)
 	}
 
 	contentLength := 0
@@ -39,9 +41,12 @@ func Parse(conn net.Conn) (Request, error) {
 		if line == "\r\n" {
 			break
 		} // 空行でヘッダー終端
-		if strings.HasPrefix(line, "Content-Length:") {
+		if strings.HasPrefix(strings.ToLower(line), "content-length:") {
 			parts := strings.SplitN(line, ":", 2)
-			contentLength, _ = strconv.Atoi(strings.TrimSpace(parts[1]))
+			contentLength, err = strconv.Atoi(strings.TrimSpace(parts[1]))
+			if err != nil {
+				return Request{}, fmt.Errorf("invalid Content-Length: %w", err)
+			}
 		}
 	}
 
