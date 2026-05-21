@@ -8,6 +8,14 @@ lang:typescript:
       - '**/*.ts'
       - '**/*.tsx'
 
+lang:ruby:
+  - changed-files:
+    - any-glob-to-any-file: '**/*.rb'
+
+languages/ruby:
+  - changed-files:
+    - any-glob-to-any-file: 'languages/ruby/**'
+
 cron-scheduler:
   - changed-files:
     - any-glob-to-any-file: 'crafts/cron-scheduler/**'

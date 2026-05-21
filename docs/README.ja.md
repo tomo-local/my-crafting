@@ -30,6 +30,7 @@
 |------|-----------|------|
 | [Haskell](../languages/haskell) | [study-haskell](https://github.com/tomo-local/study-haskell) | 🚧 |
 | [C](../languages/c) | [study-C](https://github.com/tomo-local/study-C) | 🚧 |
+| [Ruby](../languages/ruby) | — | 🚧 |
 
 ## ライブラリ・ランタイム
 
@@ -60,7 +61,8 @@ my-crafting/
 │   └── url-shortener/
 ├── languages/
 │   ├── haskell/
-│   └── c/
+│   ├── c/
+│   └── ruby/
 ├── libraries/
 │   ├── htmx/
 │   ├── deno/

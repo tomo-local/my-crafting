@@ -32,6 +32,7 @@ Each topic is organized by directory and may include multiple language implement
 |----------|------|--------|
 | [Haskell](./languages/haskell) | [study-haskell](https://github.com/tomo-local/study-haskell) | 🚧 |
 | [C](./languages/c) | [study-C](https://github.com/tomo-local/study-C) | 🚧 |
+| [Ruby](./languages/ruby) | — | 🚧 |
 
 ## Libraries
 
@@ -62,7 +63,8 @@ my-crafting/
 │   └── url-shortener/
 ├── languages/
 │   ├── haskell/
-│   └── c/
+│   ├── c/
+│   └── ruby/
 ├── libraries/
 │   ├── htmx/
 │   ├── deno/
