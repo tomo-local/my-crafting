@@ -28,7 +28,7 @@ func Parse(r io.Reader) (Request, error) {
 	}
 
 	fields := strings.Fields(strings.TrimRight(line, "\r\n"))
-	if len(fields) < 2 {
+	if len(fields) != 3 {
 		return Request{}, fmt.Errorf("invalid request line: %q", line)
 	}
 
