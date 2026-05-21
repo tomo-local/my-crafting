@@ -8,7 +8,7 @@
 
 | トピック | 言語 | 状態 |
 |---------|------|------|
-| [HTTP サーバー](../crafts/http-server) | Go | 進行中 |
+| [HTTP サーバー](../crafts/http-server) | Go | ✅ |
 | [typescript-mini-zod](../crafts/typescript-mini-zod) | TypeScript | 完了 |
 | [react-mini-zustand](../crafts/react-mini-zustand) | TypeScript | 完了 |
 | [react-mini-jotai](../crafts/react-mini-jotai) | TypeScript | 完了 |

@@ -10,7 +10,7 @@ Each topic is organized by directory and may include multiple language implement
 
 | Topic | Languages | Status |
 |-------|-----------|--------|
-| [HTTP Server](./crafts/http-server) | Go | In Progress |
+| [HTTP Server](./crafts/http-server) | Go | ✅ |
 | [typescript-mini-zod](./crafts/typescript-mini-zod) | TypeScript | Done |
 | [react-mini-zustand](./crafts/react-mini-zustand) | TypeScript | Done |
 | [react-mini-jotai](./crafts/react-mini-jotai) | TypeScript | Done |
