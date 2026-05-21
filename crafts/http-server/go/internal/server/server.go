@@ -3,7 +3,6 @@ package server
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"strings"
@@ -53,26 +52,21 @@ func (s *Server) ListenAndServe() error {
 
 func (s *Server) ServeConn(conn net.Conn) {
 	defer conn.Close()
+	reader := bufio.NewReader(conn)
 
 	// addの取得
 	addr := conn.RemoteAddr()
 	log.Printf("addr: %v\n", addr)
 	fmt.Println("====================")
 
-	reader := bufio.NewReader(conn)
 	for {
 		req, err := request.Parse(reader)
-		if err == io.EOF {
-			log.Printf("connect close add: %v\n", addr)
-			printSeparator(30)
-			break
-		}
 
 		// errがある場合は break
 		if err != nil {
 			log.Printf("add: %v, read err: %v\n", addr, err)
 			printSeparator(30)
-			break
+			return
 		}
 
 		log.Printf("request: %s %s %s\n", req.Method, req.Path, req.Version)

@@ -29,6 +29,7 @@ type Write = func(status StatusCode, body string) error
 func (r *Response) Write(status StatusCode, body string) error {
 	response := "HTTP/1.1 " + string(status) + "\r\n" +
 		"Content-Length: " + strconv.Itoa(len(body)) + "\r\n" +
+		"Connection: keep-alive\r\n" +
 		"\r\n" +
 		body
 
