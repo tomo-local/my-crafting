@@ -2,11 +2,13 @@ package server
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net"
 	"strings"
+	"time"
 
 	"github.com/tomo-local/http-server/internal/request"
 	"github.com/tomo-local/http-server/internal/response"
@@ -34,17 +36,16 @@ func (s *Server) ListenAndServe() error {
 	defer ln.Close()
 
 	printSeparator(65)
-	log.Printf("Server status: Started listening on %s\r\n", s.addr)
+	slog.Info("server started", "addr", s.addr)
 	printSeparator(65)
 
 	for {
-		// 接続確率
 		conn, err := ln.Accept()
 		if err != nil {
-			fmt.Printf("accept error: %v\n", err)
+			slog.Error("failed to accept connection", "err", err)
 			continue
 		}
-		fmt.Printf("conn: %v\n", conn)
+		slog.Info("connection accepted", "remote_addr", conn.RemoteAddr())
 		printSeparator(50)
 
 		go s.ServeConn(conn)
@@ -53,33 +54,36 @@ func (s *Server) ListenAndServe() error {
 
 func (s *Server) ServeConn(conn net.Conn) {
 	defer conn.Close()
-
-	// addの取得
-	addr := conn.RemoteAddr()
-	log.Printf("addr: %v\n", addr)
-	fmt.Println("====================")
-
 	reader := bufio.NewReader(conn)
+
+	addr := conn.RemoteAddr()
+	slog.Info("start serving connection", "addr", addr)
+
+	// timeoutを指定
+	const idleTimeout = 30 * time.Second
+
 	for {
+		conn.SetReadDeadline(time.Now().Add(idleTimeout))
 		req, err := request.Parse(reader)
-		if err == io.EOF {
-			log.Printf("connect close add: %v\n", addr)
-			printSeparator(30)
-			break
-		}
 
-		// errがある場合は break
 		if err != nil {
-			log.Printf("add: %v, read err: %v\n", addr, err)
+			var netErr net.Error
+			if errors.Is(err, io.EOF) || errors.Is(err, net.ErrClosed) || (errors.As(err, &netErr) && netErr.Timeout()) {
+				return
+			}
+			slog.Error("failed to parse request", "addr", addr, "err", err)
 			printSeparator(30)
-			break
+			return
 		}
 
-		log.Printf("request: %s %s %s\n", req.Method, req.Path, req.Version)
-
+		slog.Info("request received", "method", req.Method, "path", req.Path, "version", req.Version)
+		keepAlive := req.WantsKeepAlive()
 		res := response.NewResponse(conn)
-
+		res.SetKeepAlive(keepAlive)
 		s.handler(req, res.Write)
+		if !keepAlive {
+			return
+		}
 	}
 }
 

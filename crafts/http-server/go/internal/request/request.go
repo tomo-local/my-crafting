@@ -13,6 +13,7 @@ type Request struct {
 	Path          string
 	Version       string
 	ContentLength int
+	Connection    string
 	Body          io.Reader
 }
 
@@ -33,6 +34,7 @@ func Parse(r io.Reader) (Request, error) {
 	}
 
 	contentLength := 0
+	connection := ""
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil {
@@ -41,12 +43,17 @@ func Parse(r io.Reader) (Request, error) {
 		if line == "\r\n" {
 			break
 		} // 空行でヘッダー終端
-		if strings.HasPrefix(strings.ToLower(line), "content-length:") {
+		lower := strings.ToLower(line)
+		switch {
+		case strings.HasPrefix(lower, "content-length:"):
 			parts := strings.SplitN(line, ":", 2)
 			contentLength, err = strconv.Atoi(strings.TrimSpace(parts[1]))
 			if err != nil {
 				return Request{}, fmt.Errorf("invalid Content-Length: %w", err)
 			}
+		case strings.HasPrefix(lower, "connection:"):
+			parts := strings.SplitN(line, ":", 2)
+			connection = strings.ToLower(strings.TrimSpace(parts[1]))
 		}
 	}
 
@@ -55,6 +62,18 @@ func Parse(r io.Reader) (Request, error) {
 		Path:          fields[1],
 		Version:       fields[2],
 		ContentLength: contentLength,
+		Connection:    connection,
 		Body:          reader,
 	}, nil
+}
+
+// HTTP/1.1はデフォルトでkeep-alive、HTTP/1.0は明示的なConnection: keep-aliveが必要
+func (r Request) WantsKeepAlive() bool {
+	if r.Version == "HTTP/1.1" {
+		return r.Connection != "close"
+	}
+	if r.Version == "HTTP/1.0" {
+		return r.Connection == "keep-alive"
+	}
+	return false
 }
