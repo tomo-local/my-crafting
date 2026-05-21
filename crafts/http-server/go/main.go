@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"log"
 
@@ -24,39 +23,32 @@ func main() {
 func handleRequest(req request.Request, writeResponse response.Write) {
 	switch {
 	case req.Method == "POST" && req.ContentLength <= 0:
-		writeResponse(
-			response.Status.BadRequest,
-			"missing body",
-		)
+		if err := writeResponse(response.StatusBadRequest, "missing body"); err != nil {
+			log.Printf("write err: %v", err)
+		}
 	case req.Method == "POST" && req.Path == "/echo":
 		buf := make([]byte, req.ContentLength)
 		if _, err := io.ReadFull(req.Body, buf); err != nil {
-			fmt.Printf("err: %v", err)
-
-			writeResponse(
-				response.Status.InternalServerError,
-				"failed to read body",
-			)
+			log.Printf("err: %v", err)
+			if err := writeResponse(response.StatusInternalServerError, "failed to read body"); err != nil {
+				log.Printf("write err: %v", err)
+			}
 			break
 		}
-		writeResponse(
-			response.Status.OK,
-			string(buf),
-		)
+		if err := writeResponse(response.StatusOK, string(buf)); err != nil {
+			log.Printf("write err: %v", err)
+		}
 	case req.Path == "/":
-		writeResponse(
-			response.Status.OK,
-			"Welcome!",
-		)
+		if err := writeResponse(response.StatusOK, "Welcome!"); err != nil {
+			log.Printf("write err: %v", err)
+		}
 	case req.Path == "/about":
-		writeResponse(
-			response.Status.OK,
-			"About Path",
-		)
+		if err := writeResponse(response.StatusOK, "About Path"); err != nil {
+			log.Printf("write err: %v", err)
+		}
 	default:
-		writeResponse(
-			response.Status.NotFound,
-			"Not Found",
-		)
+		if err := writeResponse(response.StatusNotFound, "Not Found"); err != nil {
+			log.Printf("write err: %v", err)
+		}
 	}
 }

@@ -11,19 +11,12 @@ type Response struct {
 
 type StatusCode string
 
-type statusCodes struct {
-	OK                  StatusCode
-	BadRequest          StatusCode
-	NotFound            StatusCode
-	InternalServerError StatusCode
-}
-
-var Status = statusCodes{
-	OK:                  "200 OK",
-	BadRequest:          "400 Bad Request",
-	NotFound:            "404 Not Found",
-	InternalServerError: "500 Internal Server Error",
-}
+const (
+	StatusOK                  StatusCode = "200 OK"
+	StatusBadRequest          StatusCode = "400 Bad Request"
+	StatusNotFound            StatusCode = "404 Not Found"
+	StatusInternalServerError StatusCode = "500 Internal Server Error"
+)
 
 func NewResponse(conn net.Conn) *Response {
 	return &Response{
