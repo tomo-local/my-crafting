@@ -6,7 +6,7 @@ Each topic is organized by directory and may include multiple language implement
 
 > Japanese version: [docs/README.ja.md](docs/README.ja.md)
 
-## Topics
+## Crafts
 
 | Topic | Languages | Status |
 |-------|-----------|--------|
@@ -26,6 +26,25 @@ Each topic is organized by directory and may include multiple language implement
 | [Search Engine](./crafts/search-engine) | Go | Planned |
 | [URL Shortener](./crafts/url-shortener) | Go | Planned |
 
+## Languages
+
+| Language | Repo | Status |
+|----------|------|--------|
+| [Haskell](./languages/haskell) | [study-haskell](https://github.com/tomo-local/study-haskell) | 🚧 |
+| [C](./languages/c) | [study-C](https://github.com/tomo-local/study-C) | 🚧 |
+
+## Libraries
+
+| Library / Runtime | Repo | Status |
+|-------------------|------|--------|
+| [htmx](./libraries/htmx) | [study-htmx](https://github.com/tomo-local/study-htmx) | 🚧 |
+| [Deno](./libraries/deno) | [study-deno](https://github.com/tomo-local/study-deno) | 🚧 |
+| [gRPC](./libraries/grpc) | [study-gRPC](https://github.com/tomo-local/study-gRPC) | 🚧 |
+| [XState](./libraries/xstate) | [study-xstate](https://github.com/tomo-local/study-xstate) | 🚧 |
+| [Plasmo](./libraries/plasmo) | [study-plasmo](https://github.com/tomo-local/study-plasmo) | 🚧 |
+| [WXT](./libraries/wxt) | [study-wxt](https://github.com/tomo-local/study-wxt) | 🚧 |
+| [Jotai](./libraries/jotai) | [study-jotai](https://github.com/tomo-local/study-jotai) | 🚧 |
+
 ## Structure
 
 ```
@@ -41,6 +60,17 @@ my-crafting/
 │   ├── distributed-cache/
 │   ├── search-engine/
 │   └── url-shortener/
+├── languages/
+│   ├── haskell/
+│   └── c/
+├── libraries/
+│   ├── htmx/
+│   ├── deno/
+│   ├── grpc/
+│   ├── xstate/
+│   ├── plasmo/
+│   ├── wxt/
+│   └── jotai/
 └── docs/
     └── README.ja.md
 ```
