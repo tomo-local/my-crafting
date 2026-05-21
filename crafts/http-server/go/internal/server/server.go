@@ -67,7 +67,8 @@ func (s *Server) ServeConn(conn net.Conn) {
 		req, err := request.Parse(reader)
 
 		if err != nil {
-			if errors.Is(err, io.EOF) || errors.Is(err, net.ErrClosed) {
+			var netErr net.Error
+			if errors.Is(err, io.EOF) || errors.Is(err, net.ErrClosed) || (errors.As(err, &netErr) && netErr.Timeout()) {
 				return
 			}
 			slog.Error("failed to parse request", "addr", addr, "err", err)
@@ -76,8 +77,13 @@ func (s *Server) ServeConn(conn net.Conn) {
 		}
 
 		slog.Info("request received", "method", req.Method, "path", req.Path, "version", req.Version)
+		keepAlive := req.WantsKeepAlive()
 		res := response.NewResponse(conn)
+		res.SetKeepAlive(keepAlive)
 		s.handler(req, res.Write)
+		if !keepAlive {
+			return
+		}
 	}
 }
 
