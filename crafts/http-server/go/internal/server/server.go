@@ -81,6 +81,7 @@ func (s *Server) ServeConn(conn net.Conn) {
 		res := response.NewResponse(conn)
 		res.SetKeepAlive(keepAlive)
 		s.handler(req, res.Write)
+		// closeの場合は処理を終了する
 		if !keepAlive {
 			return
 		}
