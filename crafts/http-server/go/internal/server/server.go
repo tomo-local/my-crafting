@@ -57,22 +57,8 @@ func (s *Server) ServeConn(conn net.Conn) {
 	log.Printf("addr: %v\n", addr)
 	fmt.Println("====================")
 
-	// 空のメモリを用意
-	buf := make([]byte, 4096)
-
 	for {
-		n, err := conn.Read(buf)
-
-		if n > 0 {
-			log.Println("request:")
-			req, err := request.Parse(buf[:n])
-			if err != nil {
-				fmt.Printf("error: %v\r\n", err)
-				continue
-			}
-			s.handler(req, conn)
-		}
-
+		req, err := request.Parse(conn)
 		if err == io.EOF {
 			log.Printf("connect close add: %v\n", addr)
 			printSeparator(30)
@@ -85,6 +71,11 @@ func (s *Server) ServeConn(conn net.Conn) {
 			printSeparator(30)
 			break
 		}
+
+		log.Println("request:")
+		fmt.Println(req)
+
+		s.handler(req, conn)
 	}
 }
 
