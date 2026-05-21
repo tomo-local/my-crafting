@@ -9,9 +9,10 @@ import (
 	"strings"
 
 	"github.com/tomo-local/http-server/internal/request"
+	"github.com/tomo-local/http-server/internal/response"
 )
 
-type Handler func(req request.Request, conn net.Conn)
+type Handler func(req request.Request, writeResponse response.Write)
 
 type Server struct {
 	addr    string
@@ -76,7 +77,9 @@ func (s *Server) ServeConn(conn net.Conn) {
 
 		log.Printf("request: %s %s %s\n", req.Method, req.Path, req.Version)
 
-		s.handler(req, conn)
+		res := response.NewResponse(conn)
+
+		s.handler(req, res.Write)
 	}
 }
 
