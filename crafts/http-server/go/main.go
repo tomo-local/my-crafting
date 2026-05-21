@@ -2,7 +2,8 @@ package main
 
 import (
 	"io"
-	"log"
+	"log/slog"
+	"os"
 
 	"github.com/tomo-local/http-server/internal/request"
 	"github.com/tomo-local/http-server/internal/response"
@@ -10,13 +11,11 @@ import (
 )
 
 func main() {
-	// サーバーの立ち上げ
 	srv := server.NewServer(":8080", handleRequest)
 
-	err := srv.ListenAndServe()
-
-	if err != nil {
-		log.Fatal(err)
+	if err := srv.ListenAndServe(); err != nil {
+		slog.Error("server failed", "err", err)
+		os.Exit(1)
 	}
 }
 
@@ -24,31 +23,31 @@ func handleRequest(req request.Request, writeResponse response.Write) {
 	switch {
 	case req.Method == "POST" && req.ContentLength <= 0:
 		if err := writeResponse(response.StatusBadRequest, "missing body"); err != nil {
-			log.Printf("write err: %v", err)
+			slog.Error("failed to write response", "err", err)
 		}
 	case req.Method == "POST" && req.Path == "/echo":
 		buf := make([]byte, req.ContentLength)
 		if _, err := io.ReadFull(req.Body, buf); err != nil {
-			log.Printf("err: %v", err)
+			slog.Error("failed to read body", "err", err)
 			if err := writeResponse(response.StatusInternalServerError, "failed to read body"); err != nil {
-				log.Printf("write err: %v", err)
+				slog.Error("failed to write response", "err", err)
 			}
 			break
 		}
 		if err := writeResponse(response.StatusOK, string(buf)); err != nil {
-			log.Printf("write err: %v", err)
+			slog.Error("failed to write response", "err", err)
 		}
 	case req.Path == "/":
 		if err := writeResponse(response.StatusOK, "Welcome!"); err != nil {
-			log.Printf("write err: %v", err)
+			slog.Error("failed to write response", "err", err)
 		}
 	case req.Path == "/about":
 		if err := writeResponse(response.StatusOK, "About Path"); err != nil {
-			log.Printf("write err: %v", err)
+			slog.Error("failed to write response", "err", err)
 		}
 	default:
 		if err := writeResponse(response.StatusNotFound, "Not Found"); err != nil {
-			log.Printf("write err: %v", err)
+			slog.Error("failed to write response", "err", err)
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package response
 
 import (
+	"fmt"
 	"net"
 	"strconv"
 )
@@ -34,5 +35,5 @@ func (r *Response) Write(status StatusCode, body string) error {
 		body
 
 	_, err := r.conn.Write([]byte(response))
-	return err
+	return fmt.Errorf("fail write err: %v", err)
 }

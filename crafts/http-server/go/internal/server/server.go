@@ -3,7 +3,7 @@ package server
 import (
 	"bufio"
 	"fmt"
-	"log"
+	"log/slog"
 	"net"
 	"strings"
 
@@ -33,17 +33,16 @@ func (s *Server) ListenAndServe() error {
 	defer ln.Close()
 
 	printSeparator(65)
-	log.Printf("Server status: Started listening on %s\r\n", s.addr)
+	slog.Info("server started", "addr", s.addr)
 	printSeparator(65)
 
 	for {
-		// 接続確率
 		conn, err := ln.Accept()
 		if err != nil {
-			fmt.Printf("accept error: %v\n", err)
+			slog.Error("failed to accept connection", "err", err)
 			continue
 		}
-		fmt.Printf("conn: %v\n", conn)
+		slog.Info("connection accepted", "remote_addr", conn.RemoteAddr())
 		printSeparator(50)
 
 		go s.ServeConn(conn)
@@ -54,25 +53,20 @@ func (s *Server) ServeConn(conn net.Conn) {
 	defer conn.Close()
 	reader := bufio.NewReader(conn)
 
-	// addの取得
 	addr := conn.RemoteAddr()
-	log.Printf("addr: %v\n", addr)
-	fmt.Println("====================")
+	slog.Info("start serving connection", "addr", addr)
 
 	for {
 		req, err := request.Parse(reader)
 
-		// errがある場合は break
 		if err != nil {
-			log.Printf("add: %v, read err: %v\n", addr, err)
+			slog.Error("failed to parse request", "addr", addr, "err", err)
 			printSeparator(30)
 			return
 		}
 
-		log.Printf("request: %s %s %s\n", req.Method, req.Path, req.Version)
-
+		slog.Info("request received", "method", req.Method, "path", req.Path, "version", req.Version)
 		res := response.NewResponse(conn)
-
 		s.handler(req, res.Write)
 	}
 }
