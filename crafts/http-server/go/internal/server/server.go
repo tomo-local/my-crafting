@@ -2,10 +2,13 @@ package server
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net"
 	"strings"
+	"time"
 
 	"github.com/tomo-local/http-server/internal/request"
 	"github.com/tomo-local/http-server/internal/response"
@@ -56,10 +59,17 @@ func (s *Server) ServeConn(conn net.Conn) {
 	addr := conn.RemoteAddr()
 	slog.Info("start serving connection", "addr", addr)
 
+	// timeoutを指定
+	const idleTimeout = 30 * time.Second
+
 	for {
+		conn.SetReadDeadline(time.Now().Add(idleTimeout))
 		req, err := request.Parse(reader)
 
 		if err != nil {
+			if errors.Is(err, io.EOF) || errors.Is(err, net.ErrClosed) {
+				return
+			}
 			slog.Error("failed to parse request", "addr", addr, "err", err)
 			printSeparator(30)
 			return
