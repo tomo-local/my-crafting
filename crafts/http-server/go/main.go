@@ -21,10 +21,10 @@ func main() {
 	}
 }
 
-func handleRequest(req request.Request, witeResponse response.Write) {
+func handleRequest(req request.Request, writeResponse response.Write) {
 	switch {
 	case req.Method == "POST" && req.ContentLength <= 0:
-		witeResponse(
+		writeResponse(
 			response.Status.BadRequest,
 			"missing body",
 		)
@@ -33,28 +33,28 @@ func handleRequest(req request.Request, witeResponse response.Write) {
 		if _, err := io.ReadFull(req.Body, buf); err != nil {
 			fmt.Printf("err: %v", err)
 
-			witeResponse(
+			writeResponse(
 				response.Status.InternalServerError,
 				"failed to read body",
 			)
 			break
 		}
-		witeResponse(
+		writeResponse(
 			response.Status.OK,
 			string(buf),
 		)
 	case req.Path == "/":
-		witeResponse(
+		writeResponse(
 			response.Status.OK,
 			"Welcome!",
 		)
 	case req.Path == "/about":
-		witeResponse(
+		writeResponse(
 			response.Status.OK,
 			"About Path",
 		)
 	default:
-		witeResponse(
+		writeResponse(
 			response.Status.NotFound,
 			"Not Found",
 		)
