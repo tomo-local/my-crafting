@@ -49,7 +49,7 @@ ch0X-<name>/
 
 ### Part 1: つくってみようKubernetes
 
-- [ ] Chapter 1 — Dockerコンテナをつくってみる
+- [x] Chapter 1 — Dockerコンテナをつくってみる
 - [ ] Chapter 2 — Kubernetesクラスタをつくってみる
 - [ ] Chapter 3 — 全体像の説明
 - [ ] Chapter 4 — アプリケーションをKubernetesクラスタ上につくる
