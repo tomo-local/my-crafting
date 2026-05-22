@@ -14,29 +14,29 @@
 	path = crafts/react-mini-valtio
 	url = https://github.com/tomo-local/react-mini-valtio
 [submodule "languages/haskell"]
-	path = languages/haskell
+	path = lab/lang/haskell
 	url = https://github.com/tomo-local/study-haskell
 [submodule "languages/c"]
-	path = languages/c
+	path = lab/lang/c
 	url = https://github.com/tomo-local/study-C
 [submodule "libraries/htmx"]
-	path = libraries/htmx
+	path = lab/lib/htmx
 	url = https://github.com/tomo-local/study-htmx
 [submodule "libraries/deno"]
-	path = libraries/deno
+	path = lab/lib/deno
 	url = https://github.com/tomo-local/study-deno
 [submodule "libraries/grpc"]
-	path = libraries/grpc
+	path = lab/lib/grpc
 	url = https://github.com/tomo-local/study-gRPC
 [submodule "libraries/xstate"]
-	path = libraries/xstate
+	path = lab/lib/xstate
 	url = https://github.com/tomo-local/study-xstate
 [submodule "libraries/plasmo"]
-	path = libraries/plasmo
+	path = lab/lib/plasmo
 	url = https://github.com/tomo-local/study-plasmo
 [submodule "libraries/wxt"]
-	path = libraries/wxt
+	path = lab/lib/wxt
 	url = https://github.com/tomo-local/study-wxt
 [submodule "libraries/jotai"]
-	path = libraries/jotai
+	path = lab/lib/jotai
 	url = https://github.com/tomo-local/study-jotai
