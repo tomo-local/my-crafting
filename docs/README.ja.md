@@ -14,10 +14,10 @@
 | [react-mini-jotai](../crafts/react-mini-jotai) | TypeScript | ✅ |
 | [react-mini-xstate](../crafts/react-mini-xstate) | TypeScript | ✅ |
 | [react-mini-valtio](../crafts/react-mini-valtio) | TypeScript | ✅ |
-| [リバースプロキシ / ロードバランサー](../crafts/reverse-proxy) | Go | 予定 |
+| [リバースプロキシ / ロードバランサー](../crafts/reverse-proxy) | Go | 🚧 |
+| [Pub/Sub ブローカー](../crafts/pub-sub) | Go | 🚧 |
 | [レートリミッター](../crafts/rate-limiter) | Go | 予定 |
 | [URL 短縮サービス](../crafts/url-shortener) | Go | 予定 |
-| [Pub/Sub ブローカー](../crafts/pub-sub) | Go | 予定 |
 | [WebSocket ブローカー](../crafts/websocket-broker) | Go | 予定 |
 | [Redis クローン](../crafts/redis-clone) | Go | 予定 |
 | [CRON タスクスケジューラー](../crafts/cron-scheduler) | Go | 予定 |
@@ -25,25 +25,33 @@
 | [ミニ検索エンジン](../crafts/search-engine) | Go | 予定 |
 | [Kafka クローン（メッセージブローカー）](../crafts/kafka-clone) | Go | 予定 |
 
-## 言語学習
+## Lab
+
+### 言語学習
 
 | 言語 | リポジトリ | 状態 |
 |------|-----------|------|
-| [Haskell](../languages/haskell) | [study-haskell](https://github.com/tomo-local/study-haskell) | 🚧 |
-| [C](../languages/c) | [study-C](https://github.com/tomo-local/study-C) | 🚧 |
-| [Ruby](../languages/ruby) | — | 🚧 |
+| [Haskell](../lab/lang/haskell) | [study-haskell](https://github.com/tomo-local/study-haskell) | 🚧 |
+| [C](../lab/lang/c) | [study-C](https://github.com/tomo-local/study-C) | 🚧 |
+| [Ruby](../lab/lang/ruby) | — | 🚧 |
 
-## ライブラリ・ランタイム
+### ライブラリ・ランタイム
 
 | ライブラリ / ランタイム | リポジトリ | 状態 |
 |----------------------|-----------|------|
-| [htmx](../libraries/htmx) | [study-htmx](https://github.com/tomo-local/study-htmx) | 🚧 |
-| [Deno](../libraries/deno) | [study-deno](https://github.com/tomo-local/study-deno) | 🚧 |
-| [gRPC](../libraries/grpc) | [study-gRPC](https://github.com/tomo-local/study-gRPC) | 🚧 |
-| [XState](../libraries/xstate) | [study-xstate](https://github.com/tomo-local/study-xstate) | 🚧 |
-| [Plasmo](../libraries/plasmo) | [study-plasmo](https://github.com/tomo-local/study-plasmo) | 🚧 |
-| [WXT](../libraries/wxt) | [study-wxt](https://github.com/tomo-local/study-wxt) | 🚧 |
-| [Jotai](../libraries/jotai) | [study-jotai](https://github.com/tomo-local/study-jotai) | 🚧 |
+| [htmx](../lab/lib/htmx) | [study-htmx](https://github.com/tomo-local/study-htmx) | 🚧 |
+| [Deno](../lab/lib/deno) | [study-deno](https://github.com/tomo-local/study-deno) | 🚧 |
+| [gRPC](../lab/lib/grpc) | [study-gRPC](https://github.com/tomo-local/study-gRPC) | 🚧 |
+| [XState](../lab/lib/xstate) | [study-xstate](https://github.com/tomo-local/study-xstate) | 🚧 |
+| [Plasmo](../lab/lib/plasmo) | [study-plasmo](https://github.com/tomo-local/study-plasmo) | 🚧 |
+| [WXT](../lab/lib/wxt) | [study-wxt](https://github.com/tomo-local/study-wxt) | 🚧 |
+| [Jotai](../lab/lib/jotai) | [study-jotai](https://github.com/tomo-local/study-jotai) | 🚧 |
+
+### インフラ
+
+| トピック | 状態 |
+|---------|------|
+| [Kubernetes Build-Break-Fix](../lab/infra/kubernetes/build-break-fix) | 🚧 |
 
 ## ディレクトリ構成
 
@@ -52,27 +60,30 @@ my-crafting/
 ├── crafts/
 │   ├── http-server/
 │   ├── reverse-proxy/
+│   ├── pub-sub/
 │   ├── rate-limiter/
 │   ├── url-shortener/
-│   ├── pub-sub/
 │   ├── websocket-broker/
 │   ├── redis-clone/
 │   ├── cron-scheduler/
 │   ├── distributed-cache/
 │   ├── search-engine/
 │   └── kafka-clone/
-├── languages/
-│   ├── haskell/
-│   ├── c/
-│   └── ruby/
-├── libraries/
-│   ├── htmx/
-│   ├── deno/
-│   ├── grpc/
-│   ├── xstate/
-│   ├── plasmo/
-│   ├── wxt/
-│   └── jotai/
+├── lab/
+│   ├── lang/
+│   │   ├── haskell/
+│   │   ├── c/
+│   │   └── ruby/
+│   ├── lib/
+│   │   ├── htmx/
+│   │   ├── deno/
+│   │   ├── grpc/
+│   │   ├── xstate/
+│   │   ├── plasmo/
+│   │   ├── wxt/
+│   │   └── jotai/
+│   └── infra/
+│       └── kubernetes/
 └── docs/
     └── README.ja.md
 ```

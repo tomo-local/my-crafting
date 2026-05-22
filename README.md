@@ -16,10 +16,10 @@ Each topic is organized by directory and may include multiple language implement
 | [react-mini-xstate](./crafts/react-mini-xstate) | TypeScript | ✅ |
 | [react-mini-valtio](./crafts/react-mini-valtio) | TypeScript | ✅ |
 | [HTTP Server](./crafts/http-server) | Go | ✅ |
-| [Reverse Proxy / Load Balancer](./crafts/reverse-proxy) | Go | Planned |
+| [Reverse Proxy / Load Balancer](./crafts/reverse-proxy) | Go | 🚧 |
+| [Pub/Sub Broker](./crafts/pub-sub) | Go | 🚧 |
 | [Rate Limiter](./crafts/rate-limiter) | Go | Planned |
 | [URL Shortener](./crafts/url-shortener) | Go | Planned |
-| [Pub/Sub Broker](./crafts/pub-sub) | Go | Planned |
 | [WebSocket Broker](./crafts/websocket-broker) | Go | Planned |
 | [Redis Clone](./crafts/redis-clone) | Go | Planned |
 | [CRON Scheduler](./crafts/cron-scheduler) | Go | Planned |
@@ -27,25 +27,33 @@ Each topic is organized by directory and may include multiple language implement
 | [Search Engine](./crafts/search-engine) | Go | Planned |
 | [Kafka Clone](./crafts/kafka-clone) | Go | Planned |
 
-## Languages
+## Lab
+
+### Languages
 
 | Language | Repo | Status |
 |----------|------|--------|
-| [Haskell](./languages/haskell) | [study-haskell](https://github.com/tomo-local/study-haskell) | 🚧 |
-| [C](./languages/c) | [study-C](https://github.com/tomo-local/study-C) | 🚧 |
-| [Ruby](./languages/ruby) | — | 🚧 |
+| [Haskell](./lab/lang/haskell) | [study-haskell](https://github.com/tomo-local/study-haskell) | 🚧 |
+| [C](./lab/lang/c) | [study-C](https://github.com/tomo-local/study-C) | 🚧 |
+| [Ruby](./lab/lang/ruby) | — | 🚧 |
 
-## Libraries
+### Libraries
 
 | Library / Runtime | Repo | Status |
 |-------------------|------|--------|
-| [htmx](./libraries/htmx) | [study-htmx](https://github.com/tomo-local/study-htmx) | 🚧 |
-| [Deno](./libraries/deno) | [study-deno](https://github.com/tomo-local/study-deno) | 🚧 |
-| [gRPC](./libraries/grpc) | [study-gRPC](https://github.com/tomo-local/study-gRPC) | 🚧 |
-| [XState](./libraries/xstate) | [study-xstate](https://github.com/tomo-local/study-xstate) | 🚧 |
-| [Plasmo](./libraries/plasmo) | [study-plasmo](https://github.com/tomo-local/study-plasmo) | 🚧 |
-| [WXT](./libraries/wxt) | [study-wxt](https://github.com/tomo-local/study-wxt) | 🚧 |
-| [Jotai](./libraries/jotai) | [study-jotai](https://github.com/tomo-local/study-jotai) | 🚧 |
+| [htmx](./lab/lib/htmx) | [study-htmx](https://github.com/tomo-local/study-htmx) | 🚧 |
+| [Deno](./lab/lib/deno) | [study-deno](https://github.com/tomo-local/study-deno) | 🚧 |
+| [gRPC](./lab/lib/grpc) | [study-gRPC](https://github.com/tomo-local/study-gRPC) | 🚧 |
+| [XState](./lab/lib/xstate) | [study-xstate](https://github.com/tomo-local/study-xstate) | 🚧 |
+| [Plasmo](./lab/lib/plasmo) | [study-plasmo](https://github.com/tomo-local/study-plasmo) | 🚧 |
+| [WXT](./lab/lib/wxt) | [study-wxt](https://github.com/tomo-local/study-wxt) | 🚧 |
+| [Jotai](./lab/lib/jotai) | [study-jotai](https://github.com/tomo-local/study-jotai) | 🚧 |
+
+### Infrastructure
+
+| Topic | Status |
+|-------|--------|
+| [Kubernetes Build-Break-Fix](./lab/infra/kubernetes/build-break-fix) | 🚧 |
 
 ## Structure
 
@@ -54,27 +62,30 @@ my-crafting/
 ├── crafts/
 │   ├── http-server/
 │   ├── reverse-proxy/
+│   ├── pub-sub/
 │   ├── rate-limiter/
 │   ├── url-shortener/
-│   ├── pub-sub/
 │   ├── websocket-broker/
 │   ├── redis-clone/
 │   ├── cron-scheduler/
 │   ├── distributed-cache/
 │   ├── search-engine/
 │   └── kafka-clone/
-├── languages/
-│   ├── haskell/
-│   ├── c/
-│   └── ruby/
-├── libraries/
-│   ├── htmx/
-│   ├── deno/
-│   ├── grpc/
-│   ├── xstate/
-│   ├── plasmo/
-│   ├── wxt/
-│   └── jotai/
+├── lab/
+│   ├── lang/
+│   │   ├── haskell/
+│   │   ├── c/
+│   │   └── ruby/
+│   ├── lib/
+│   │   ├── htmx/
+│   │   ├── deno/
+│   │   ├── grpc/
+│   │   ├── xstate/
+│   │   ├── plasmo/
+│   │   ├── wxt/
+│   │   └── jotai/
+│   └── infra/
+│       └── kubernetes/
 └── docs/
     └── README.ja.md
 ```
