@@ -14,15 +14,16 @@
 | [react-mini-jotai](../crafts/react-mini-jotai) | TypeScript | ✅ |
 | [react-mini-xstate](../crafts/react-mini-xstate) | TypeScript | ✅ |
 | [react-mini-valtio](../crafts/react-mini-valtio) | TypeScript | ✅ |
-| [Redis クローン](../crafts/redis-clone) | Go | 予定 |
-| [Kafka クローン（メッセージブローカー）](../crafts/kafka-clone) | Go | 予定 |
 | [リバースプロキシ / ロードバランサー](../crafts/reverse-proxy) | Go | 予定 |
 | [レートリミッター](../crafts/rate-limiter) | Go | 予定 |
-| [CRON タスクスケジューラー](../crafts/cron-scheduler) | Go | 予定 |
+| [URL 短縮サービス](../crafts/url-shortener) | Go | 予定 |
+| [Pub/Sub ブローカー](../crafts/pub-sub) | Go | 予定 |
 | [WebSocket ブローカー](../crafts/websocket-broker) | Go | 予定 |
+| [Redis クローン](../crafts/redis-clone) | Go | 予定 |
+| [CRON タスクスケジューラー](../crafts/cron-scheduler) | Go | 予定 |
 | [分散キャッシュ（一貫性ハッシュ）](../crafts/distributed-cache) | Go | 予定 |
 | [ミニ検索エンジン](../crafts/search-engine) | Go | 予定 |
-| [URL 短縮サービス](../crafts/url-shortener) | Go | 予定 |
+| [Kafka クローン（メッセージブローカー）](../crafts/kafka-clone) | Go | 予定 |
 
 ## 言語学習
 
@@ -50,15 +51,16 @@
 my-crafting/
 ├── crafts/
 │   ├── http-server/
-│   ├── redis-clone/
-│   ├── kafka-clone/
 │   ├── reverse-proxy/
 │   ├── rate-limiter/
-│   ├── cron-scheduler/
+│   ├── url-shortener/
+│   ├── pub-sub/
 │   ├── websocket-broker/
+│   ├── redis-clone/
+│   ├── cron-scheduler/
 │   ├── distributed-cache/
 │   ├── search-engine/
-│   └── url-shortener/
+│   └── kafka-clone/
 ├── languages/
 │   ├── haskell/
 │   ├── c/

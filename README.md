@@ -10,21 +10,22 @@ Each topic is organized by directory and may include multiple language implement
 
 | Topic | Languages | Status |
 |-------|-----------|--------|
-| [HTTP Server](./crafts/http-server) | Go | ✅ |
 | [typescript-mini-zod](./crafts/typescript-mini-zod) | TypeScript | ✅ |
 | [react-mini-zustand](./crafts/react-mini-zustand) | TypeScript | ✅ |
 | [react-mini-jotai](./crafts/react-mini-jotai) | TypeScript | ✅ |
 | [react-mini-xstate](./crafts/react-mini-xstate) | TypeScript | ✅ |
 | [react-mini-valtio](./crafts/react-mini-valtio) | TypeScript | ✅ |
-| [Redis Clone](./crafts/redis-clone) | Go | Planned |
-| [Kafka Clone](./crafts/kafka-clone) | Go | Planned |
+| [HTTP Server](./crafts/http-server) | Go | ✅ |
 | [Reverse Proxy / Load Balancer](./crafts/reverse-proxy) | Go | Planned |
 | [Rate Limiter](./crafts/rate-limiter) | Go | Planned |
-| [CRON Scheduler](./crafts/cron-scheduler) | Go | Planned |
+| [URL Shortener](./crafts/url-shortener) | Go | Planned |
+| [Pub/Sub Broker](./crafts/pub-sub) | Go | Planned |
 | [WebSocket Broker](./crafts/websocket-broker) | Go | Planned |
+| [Redis Clone](./crafts/redis-clone) | Go | Planned |
+| [CRON Scheduler](./crafts/cron-scheduler) | Go | Planned |
 | [Distributed Cache](./crafts/distributed-cache) | Go | Planned |
 | [Search Engine](./crafts/search-engine) | Go | Planned |
-| [URL Shortener](./crafts/url-shortener) | Go | Planned |
+| [Kafka Clone](./crafts/kafka-clone) | Go | Planned |
 
 ## Languages
 
@@ -52,15 +53,16 @@ Each topic is organized by directory and may include multiple language implement
 my-crafting/
 ├── crafts/
 │   ├── http-server/
-│   ├── redis-clone/
-│   ├── kafka-clone/
 │   ├── reverse-proxy/
 │   ├── rate-limiter/
-│   ├── cron-scheduler/
+│   ├── url-shortener/
+│   ├── pub-sub/
 │   ├── websocket-broker/
+│   ├── redis-clone/
+│   ├── cron-scheduler/
 │   ├── distributed-cache/
 │   ├── search-engine/
-│   └── url-shortener/
+│   └── kafka-clone/
 ├── languages/
 │   ├── haskell/
 │   ├── c/
