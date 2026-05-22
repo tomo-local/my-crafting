@@ -12,6 +12,10 @@ lang:ruby:
   - changed-files:
       - any-glob-to-any-file: "**/*.rb"
 
+infra:kubernetes:
+  - changed-files:
+      - any-glob-to-any-file: "lab/infra/kubernetes/**"
+
 cron-scheduler:
   - changed-files:
       - any-glob-to-any-file: "crafts/cron-scheduler/**"
