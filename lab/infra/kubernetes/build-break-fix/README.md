@@ -51,8 +51,8 @@ ch0X-<name>/
 
 - [x] Chapter 1 — Dockerコンテナをつくってみる
 - [x] Chapter 2 — Kubernetesクラスタをつくってみる
-- [ ] Chapter 3 — 全体像の説明
-- [ ] Chapter 4 — アプリケーションをKubernetesクラスタ上につくる
+- [x] Chapter 3 — 全体像の説明
+- [x] Chapter 4 — アプリケーションをKubernetesクラスタ上につくる
 
 ### Part 2: アプリケーションを壊して学ぶKubernetes
 
