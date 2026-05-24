@@ -56,7 +56,7 @@ ch0X-<name>/
 
 ### Part 2: アプリケーションを壊して学ぶKubernetes
 
-- [ ] Chapter 5 — トラブルシューティングガイドとkubectlコマンドの使い方
+- [x] Chapter 5 — トラブルシューティングガイドとkubectlコマンドの使い方
 - [ ] Chapter 6 — Kubernetesリソースをつくって壊そう
 - [ ] Chapter 7 — 安全なステートレス・アプリケーションをつくるために
 - [ ] Chapter 8 — 総復習：アプリケーションを直そう
