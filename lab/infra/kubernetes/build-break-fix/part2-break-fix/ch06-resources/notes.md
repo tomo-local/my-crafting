@@ -125,3 +125,124 @@ RollingUpdateを使用する場合、maxUnavailableとmaxSurgeのフィールド
 - maxSurge: 更新中に作成されるPodの最大数を指定します。デフォルトは25%です。
 これらのフィールドを適切に設定することで、更新中の可用性を確保しながら効率的なローリングアップデートを実現できます。
 
+## Deploymentをつくって壊してみよう
+
+下記のyamlファイルをapplyして、Deploymentを作成してみましょう。
+> ./k8s/deployment-hello-server.yml
+
+```sh
+❯ kub apply -f ./k8s/deployment-hello-server.yml
+deployment.apps/hello-server created
+```
+Deploymentが作成されたことを確認できます。
+
+```sh
+❯ kub get pod
+NAME                            READY   STATUS    RESTARTS   AGE
+hello-server-864c8d69f7-lhsqc   1/1     Running   0          5s
+hello-server-864c8d69f7-p2gv8   1/1     Running   0          5s
+hello-server-864c8d69f7-vdzlg   1/1     Running   0          5s
+```
+podを削除
+
+```sh
+❯ kub delete pod hello-server-864c8d69f7-lhsqc
+pod "hello-server-864c8d69f7-lhsqc" deleted
+```
+
+削除したpodが再度作成されることを確認できます。
+
+```sh
+❯ kub get pod
+NAME                            READY   STATUS    RESTARTS   AGE
+hello-server-864c8d69f7-p2gv8   1/1     Running   0          82s
+hello-server-864c8d69f7-v5tkl   1/1     Running   0          3s
+hello-server-864c8d69f7-vdzlg   1/1     Running   0          82s
+```
+
+では port-forwardしてみましょう。
+
+```sh
+❯  kub port-forward deployment/hello-server 8080:8080
+Forwarding from 127.0.0.1:8080 -> 8080
+Forwarding from [::1]:8080 -> 8080
+```
+
+ブラウザで http://localhost:8080 にアクセスしてみましょう。
+Hello, World!と表示されることを確認できます。
+
+次に 下記のyamlファイルをapplyして、Deploymentを更新してみましょう。
+> ./k8s/deployment-hello-server-rollingupdate.yml
+
+PodのStatusがImagePullBackOffになっていることを確認できます。
+
+```sh
+❯ kub get pod
+NAME                            READY   STATUS             RESTARTS   AGE
+hello-server-7886f99c58-qhjkw   0/1     ImagePullBackOff   0          19s
+hello-server-864c8d69f7-p2gv8   1/1     Running            0          5m13s
+hello-server-864c8d69f7-v5tkl   1/1     Running            0          3m54s
+hello-server-864c8d69f7-vdzlg   1/1     Running            0          5m13s
+```
+
+ImagePullBackOffは、指定されたイメージが見つからない場合や、イメージのプルに失敗した場合に発生するエラーです。
+同じように、ブラウザで http://localhost:8080 にアクセスしてみましょう。
+Hello, World!と表示されることを確認できます。
+
+RollingUpdateの戦略を使用しているため、古いPodは正常に動作し続け、新しいPodが失敗してもサービスが継続されることがわかります。
+デフォルトで、maxUnavailableは25%で、maxSurgeも25%であるため、更新中に利用できないPodの最大数は1で、更新中に作成されるPodの最大数も1になります。
+
+これは新しいPodがUP-TO-DATEになっており、古いPodがまだ利用可能であることを意味します。
+
+```sh
+❯ kub get deployments
+NAME           READY   UP-TO-DATE   AVAILABLE   AGE
+hello-server   3/3     1            3           7m56s
+```
+
+ReplicaSetを確認すると、古いReplicaSetは3のPodを管理し、新しいReplicaSetは0のPodを管理していることがわかります。
+
+```sh
+❯ kub get replicasets
+NAME                      DESIRED   CURRENT   READY   AGE
+hello-server-7886f99c58   1         1         0       4m3s
+hello-server-864c8d69f7   3         3         3       8m57s
+```
+
+前回同じ問題なので、editして、imageをhello-server:1.2.0に変更してみましょう。
+
+```sh
+❯ kub edit deployment hello-server
+```
+
+```sh
+❯ kub get pod,replicasets,deployments
+NAME                                READY   STATUS    RESTARTS   AGE
+pod/hello-server-78d89df559-25llb   1/1     Running   0          61s
+pod/hello-server-78d89df559-f4ntl   1/1     Running   0          62s
+pod/hello-server-78d89df559-vkp4q   1/1     Running   0          67s
+
+NAME                                      DESIRED   CURRENT   READY   AGE
+replicaset.apps/hello-server-7886f99c58   0         0         0       6m39s
+replicaset.apps/hello-server-78d89df559   3         3         3       67s
+replicaset.apps/hello-server-864c8d69f7   0         0         0       11m
+
+NAME                           READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/hello-server   3/3     3            3           11m
+```
+
+すべてのRollingUpdateが完了したので、port-forwardの接続が切れているはずです。
+```sh
+❯  kub port-forward deployment/hello-server 8080:8080
+Forwarding from 127.0.0.1:8080 -> 8080
+Forwarding from [::1]:8080 -> 8080
+Handling connection for 8080
+Handling connection for 8080
+Handling connection for 8080
+Handling connection for 8080
+Handling connection for 8080
+E0526 03:43:34.191156   75414 portforward.go:424] "Unhandled Error" err="an error occurred forwarding 8080 -> 8080: error forwarding port 8080 to pod 9f17366303eb4d65c1de5a507b9e9e2db2c7e3d8b5194df09cca0d0b04d34359, uid : failed to find sandbox \"9f17366303eb4d65c1de5a507b9e9e2db2c7e3d8b5194df09cca0d0b04d34359\" in store: not found"
+error: lost connection to pod
+```
+再度接続して確認してみましょう！
+
