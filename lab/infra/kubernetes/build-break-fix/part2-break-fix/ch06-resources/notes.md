@@ -246,3 +246,9 @@ error: lost connection to pod
 ```
 再度接続して確認してみましょう！
 
+
+## Podへのアクセスを助けるService
+先ほど、RollingUpdateのimageを更新した際に port-forwardの接続が切れてしまいました。
+Serviceを作成して、Podへのアクセスを安定させることができます。
+
+[Serviceのイメージ](./image/service.excalidraw.png)
