@@ -524,7 +524,7 @@ diff -u -N /var/folders/kr/z15pp29s0zj3m_17f2sddzhr0000gn/T/LIVE-3153552221/v1.S
  status:
 ```
 
-### ConfigMapを作成してみよう
+## ConfigMapを作成してみよう
 
 - コンテナ内のコマンドの引数として読み込む
 - コンテナの環境変数として読み込む
@@ -778,4 +778,57 @@ PodのStatusがRunningになっていることを確認できます。
 ❯ kub get pods
 NAME                           READY   STATUS    RESTARTS   AGE
 hello-server-67588987f-bhpz8   1/1     Running   0          6m51s
+```
+
+## Secretを作成してみよう
+
+データベースのパスワードなどの機密情報を管理するためのリソースです。
+SecretはBase64エンコードされたデータを保存しますが、暗号化されているわけではないため、アクセス制御が重要です。
+Secretを作成してPodから読み込む方法は、ConfigMapと同様に、環境変数として読み込む方法と、ボリュームとしてマウントして読み込む方法があります。
+
+### 環境変数として読み込む
+
+k8s/secret/nginx-secret.yml に nginxのユーザー名とパスワードをSecretに保存して、Podから読み込んでみましょう。
+
+```sh
+❯ kub apply -f k8s/secret/nginx-secret.yml
+pod/nginx-sample created
+secret/nginx-secret created
+```
+
+```sh
+❯ kub get pod,secrets
+NAME               READY   STATUS              RESTARTS   AGE
+pod/nginx-sample   0/1     ContainerCreating   0          10s
+
+NAME                  TYPE     DATA   AGE
+secret/nginx-secret   Opaque   2      10s
+```
+
+podにアクセスして、環境変数として読み込まれていることを確認できます。
+
+```sh
+❯ kub exec -it nginx-sample -- /bin/sh
+# echo $USERNAME
+admin
+# echo $PASSWORD
+admin123
+# exit
+```
+
+### ボリュームとしてマウントして読み込む
+k8s/secret/nginx-secret-volume.yml に nginxのユーザー名とパスワードをSecretに保存して、Podから読み込んでみましょう。
+
+```sh
+❯ kub apply -f k8s/secret/nginx-volume.yaml
+pod/nginx-sample created
+secret/nginx-secret created
+```
+
+podにアクセスして、ボリュームとしてマウントされていることを確認できます。
+```sh
+❯ kub exec -it nginx-sample -- /bin/sh
+# cat /etc/config/server.key
+eM9ku3ecCpUL9zPoIIuG2ptZZC5Cu4ZCQXRymlHajYvZyffpM6
+# exit
 ```
