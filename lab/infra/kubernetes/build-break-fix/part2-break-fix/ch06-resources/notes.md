@@ -525,3 +525,257 @@ diff -u -N /var/folders/kr/z15pp29s0zj3m_17f2sddzhr0000gn/T/LIVE-3153552221/v1.S
 ```
 
 ### ConfigMapを作成してみよう
+
+- コンテナ内のコマンドの引数として読み込む
+- コンテナの環境変数として読み込む
+- ボリュームとしてマウントして読み込む
+
+#### 環境変数として読み込む
+
+k8s/configmap/hello-server-env.yml に Port 8081でHello, World!を返すサーバーのコードが書いてあります。
+このコードをConfigMapに保存して、Podから読み込んでみましょう。
+
+```sh
+❯ kub apply -f k8s/configmap/hello-server-env.yml
+deployment.apps/hello-server created
+configmap/hello-server-configmap created
+```
+
+```sh
+❯ kub get deployments,configmaps
+NAME                           READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/hello-server   1/1     1            1           27s
+
+NAME                               DATA   AGE
+configmap/hello-server-configmap   1      27s
+configmap/kube-root-ca.crt         1      3m10s
+```
+
+port-forwardしてみましょう。
+
+```sh
+❯ kub port-forward deployments/hello-server 8081:8081
+Forwarding from 127.0.0.1:8081 -> 8081
+Forwarding from [::1]:8081 -> 8081
+```
+
+curlしてみましょう。
+
+```sh
+❯ curl localhost:8081
+Hello, world! Let's learn Kubernetes!%
+```
+
+#### ボリュームとしてマウントして読み込む
+
+k8s/configmap/hello-server-volume.yml に myconfig.txt というファイルをマウントして、ファイルの内容を返すサーバーのコードが書いてあります。
+このコードをConfigMapに保存して、Podから読み込んでみましょう。
+
+```sh
+❯ kub apply -f k8s/configmap/hello-server-volume.yml
+deployment.apps/hello-server created
+configmap/hello-server-configmap created
+```
+
+```sh
+❯ kub get pod
+NAME                            READY   STATUS    RESTARTS   AGE
+hello-server-594ccc7f64-8jsz7   1/1     Running   0          13s
+hello-server-594ccc7f64-qx8jx   1/1     Running   0          13s
+hello-server-594ccc7f64-tbxjt   1/1     Running   0          13s
+```
+
+volumeとしてマウントされていることを確認できます。
+
+```sh
+❯ kub describe configmaps hello-server-configmap
+Name:         hello-server-configmap
+Namespace:    default
+Labels:       <none>
+Annotations:  <none>
+
+Data
+====
+myconfig.txt:
+----
+I am hungry.
+
+
+BinaryData
+====
+
+Events:  <none>
+```
+
+port-forwardしてみましょう。
+
+```sh
+❯ kub port-forward deployments/hello-server 8080:8080
+Forwarding from 127.0.0.1:8080 -> 8080
+Forwarding from [::1]:8080 -> 8080
+```
+
+```sh
+❯ curl localhost:8080
+I am hungry.%
+```
+
+#### ConfigMapを壊してみる
+
+まずは、k8s/configmap/hello-server-env.yml をapplyして、DeploymentとConfigMapを作成してみましょう。
+
+```sh
+❯ kub apply -f k8s/configmap/hello-server-env.yml
+deployment.apps/hello-server created
+configmap/hello-server-configmap created
+```
+
+次に、k8s/configmap/hello-server-env-destruction.yml をapplyして、ConfigMapを壊してみましょう。
+
+```sh
+❯ kub apply -f k8s/configmap/hello-server-destruction.yml
+deployment.apps/hello-server configured
+configmap/hello-server-configmap unchanged
+```
+
+port-forwardしてみましょう。
+
+```sh
+❯ kub port-forward deployments/hello-server 8081:8081
+error: unable to forward port because pod is not running. Current status=Pending
+```
+
+Podを確認してみましょう
+
+```sh
+❯ kub get pod
+NAME                           READY   STATUS                       RESTARTS   AGE
+hello-server-67588987f-bhpz8   0/1     CreateContainerConfigError   0          54s
+```
+PodのStatusがCreateContainerConfigErrorになっていることがわかります。
+このエラーは、コンテナの設定を作成する際に問題が発生したことを示しています。
+ConfigMapの内容が正しくないため、Podが正常に起動できないことが原因です。
+
+```sh
+❯ kub describe pod
+Name:             hello-server-67588987f-bhpz8
+Namespace:        default
+Priority:         0
+Service Account:  default
+Node:             kind-control-plane/172.31.0.2
+Start Time:       Sat, 30 May 2026 01:49:51 +0900
+Labels:           app=hello-server
+                  pod-template-hash=67588987f
+Annotations:      <none>
+Status:           Pending
+IP:               10.244.0.10
+IPs:
+  IP:           10.244.0.10
+Controlled By:  ReplicaSet/hello-server-67588987f
+Containers:
+  hello-server:
+    Container ID:
+    Image:          blux2/hello-server:1.4
+    Image ID:
+    Port:           <none>
+    Host Port:      <none>
+    State:          Waiting
+      Reason:       CreateContainerConfigError
+    Ready:          False
+    Restart Count:  0
+    Environment:
+      PORT:  <set to the key 'PORT' of config map 'hello-server-configmap'>  Optional: false
+      HOST:  <set to the key 'HOST' of config map 'hello-server-configmap'>  Optional: false
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-mq9s2 (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True
+  Initialized                 True
+  Ready                       False
+  ContainersReady             False
+  PodScheduled                True
+Volumes:
+  kube-api-access-mq9s2:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age                 From               Message
+  ----     ------     ----                ----               -------
+  Normal   Scheduled  109s                default-scheduler  Successfully assigned default/hello-server-67588987f-bhpz8 to kind-control-plane
+  Normal   Pulled     5s (x10 over 108s)  kubelet            Container image "blux2/hello-server:1.4" already present on machine
+  Warning  Failed     5s (x10 over 108s)  kubelet            Error: couldn't find key HOST in ConfigMap default/hello-server-configmap
+```
+
+Warningのイベントに、Error: couldn't find key HOST in ConfigMap default/hello-server-configmapとあることがわかります。
+次に、deploymentでしているenvのkeyと、ConfigMapのkeyを確認してみましょう。
+
+```sh
+❯ kub get deployment hello-server -o yaml
+apiVersion: apps/v1
+kind: Deployment
+.....
+
+      containers:
+      - env:
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              key: PORT
+              name: hello-server-configmap
+        - name: HOST
+          valueFrom:
+            configMapKeyRef:
+              key: HOST
+              name: hello-server-configmap
+        image: blux2/hello-server:1.4
+        imagePullPolicy: IfNotPresent
+        name: hello-server
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+.....
+```
+
+```sh
+❯ kub get configmaps hello-server-configmap -o yaml
+apiVersion: v1
+data:
+  PORT: "8081"
+kind: ConfigMap
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","data":{"PORT":"8081"},"kind":"ConfigMap","metadata":{"annotations":{},"name":"hello-server-configmap","namespace":"default"}}
+  creationTimestamp: "2026-05-29T16:48:43Z"
+  name: hello-server-configmap
+  namespace: default
+  resourceVersion: "1584"
+  uid: e83ff9a9-de6b-4511-a2fb-c36a535479df
+```
+
+ConfigMapにHOSTというkeyが存在しないことがわかります。
+ConfigMapを編集して、HOSTというkeyを追加してみましょう。
+
+HOST: "localhost"
+
+```sh
+❯ kub apply -f k8s/configmap/hello-server-fixed.yml
+deployment.apps/hello-server unchanged
+configmap/hello-server-configmap configured
+```
+
+PodのStatusがRunningになっていることを確認できます。
+
+```sh
+❯ kub get pods
+NAME                           READY   STATUS    RESTARTS   AGE
+hello-server-67588987f-bhpz8   1/1     Running   0          6m51s
+```
