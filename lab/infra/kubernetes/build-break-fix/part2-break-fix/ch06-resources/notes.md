@@ -252,3 +252,276 @@ error: lost connection to pod
 Serviceを作成して、Podへのアクセスを安定させることができます。
 
 [Serviceのイメージ](./image/service.excalidraw.png)
+
+Serviceのyamlファイルの例
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-server-service
+spec:
+  selector:
+    app: hello-server
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+```
+
+このファイルのみではPodが作成されないため、Deploymentを別にapplyして、Podを作成する必要があります。
+```sh
+❯ kub apply -f ./k8s/deployment-hello-server.yml
+deployment.apps/hello-server created
+```
+
+```sh
+❯ kub apply -f ./k8s/service.yml
+service/hello-server-service created
+```
+
+実際にServiceが作成されたことを確認できます。
+
+```sh
+❯ kub get service
+NAME                   TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+hello-server-service   ClusterIP   10.96.221.180   <none>        8080/TCP   3m31s
+kubernetes             ClusterIP   10.96.0.1       <none>        443/TCP    42h
+```
+
+port-forwardしてみましょう。
+
+```sh
+❯ kub port-forward svc/hello-server-service 8080:8080
+Forwarding from 127.0.0.1:8080 -> 8080
+Forwarding from [::1]:8080 -> 8080
+Handling connection for 8080
+Handling connection for 8080
+```
+
+### ServiceのTypeについて
+- ClusterIP: デフォルトのタイプで、クラスター内でのみアクセス可能なIPアドレスを割り当てます。
+- NodePort: クラスター外からアクセス可能なポートを割り当てます。NodeのIPアドレスと組み合わせてアクセスできます。
+- LoadBalancer: クラウドプロバイダーのロードバランサーを利用して、外部からアクセス可能なIPアドレスを割り当てます。
+- ExternalName: DNS名を使用して外部サービスにアクセスするためのタイプです。クラスター内のサービスに対して、外部のDNS名を割り当てます。
+
+一旦新しい Podを作成しても、Serviceを通じてアクセスできることを確認できます。
+
+#### ClusterIP
+
+```sh
+❯ kub run curl --image curlimages/curl --rm --stdin --tty --restart=Never --command -- curl 10.96.221.180:8080
+Hello, world!pod "curl" deleted
+```
+
+別のPodからhello-server-serviceにアクセスできました。
+一旦掃除
+```sh
+❯ kub delete -f k8s/deployment-hello-server.yml
+deployment.apps "hello-server" deleted
+
+❯ kub delete -f k8s/service.yml
+service "hello-server-service" deleted
+```
+
+#### NodePort
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-server-service
+spec:
+  type: NodePort
+  selector:
+    app: hello-server
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: 30080
+```
+
+```sh
+❯ kub apply -f ./k8s/service-nodeport.yml
+service/hello-server-service created
+```
+
+NodeのIPアドレスを確認して、ブラウザで http://<NodeのIPアドレス>:30080 にアクセスしてみましょう。
+Hello, World!と表示されることを確認できます。
+
+Docker Desktopの場合は、localhost:30080でアクセスできます。
+
+#### DNS
+
+先ほど作成した、hello-server-serviceは、クラスター内でhello-server-serviceというDNS名でアクセスできます。
+
+```sh
+❯ kub run curl --image curlimages/curl --rm --stdin --tty --restart=Never --command -- curl hello-server-service.default.svc.cluster.local:8080
+Hello, world!pod "curl" deleted
+```
+
+### Serviceを壊してみる
+
+上で対応したymlをapplyして、Serviceを作成してみましょう。
+```sh
+❯ kub apply -f ./k8s/service-node-port.yml
+service/hello-server-service created
+```
+
+NodeのIPアドレスを取得してみよう。
+
+```sh
+❯ kub get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}'
+172.31.0.2
+```
+今回はkindを使用しているので、localhost:30080でアクセスできます。
+
+```sh
+❯ curl localhost:30080
+Hello, world!
+```
+
+次に、service-destruction.ymlをapplyして、Serviceを壊してみましょう。
+```sh
+❯ kub apply -f ./k8s/service-destruction.yml
+service/hello-server-service configured
+```
+curlしてみましょう。
+```sh
+❯ curl localhost:30599
+curl: (52) Empty reply from server
+```
+
+まずPodから確認
+```sh
+❯ kub get pod
+NAME                            READY   STATUS    RESTARTS   AGE
+hello-server-6cc6b44795-2lxch   1/1     Running   0          6m40s
+hello-server-6cc6b44795-hvp7j   1/1     Running   0          6m40s
+hello-server-6cc6b44795-pj9kh   1/1     Running   0          6m40s
+```
+
+次はDeployment
+
+```sh
+❯ kub get deployment
+NAME           READY   UP-TO-DATE   AVAILABLE   AGE
+hello-server   3/3     3            3           7m17s
+```
+
+次にServiceを確認してみましょう。
+
+```sh
+❯ kub get service
+NAME                    TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)          AGE
+hello-server-external   NodePort    10.96.25.51   <none>        8080:30599/TCP   8m16s
+kubernetes              ClusterIP   10.96.0.1     <none>        443/TCP          3d5h
+```
+
+問題はなさそうですね。
+ということは、各何処かのサービスの通信が壊れている可能性があります。
+1. Pod 内から アプリケーションがリクエストを受け取る部分
+2. クラスタ内のネットワーク
+3. Serviceの設定
+
+Podにアクセスして、curlを実行してみましょう。
+
+```sh
+❯ kub debug --stdin --tty hello-server-6cc6b44795-2lxch --image curlimages/curl --target=hello-server -- sh
+
+Targeting container "hello-server". If you don't see processes from this container it may be because the container runtime doesn't support this feature.
+--profile=legacy is deprecated and will be removed in the future. It is recommended to explicitly specify a profile, for example "--profile=general".
+Defaulting debug container name to debugger-4dnrr.
+If you don't see a command prompt, try pressing enter.
+
+~ $ curl localhost:8080
+Hello, world!~
+$
+```
+
+問題はないので次の検証です。
+
+同じクラスタで、新しく別のPodを作成してPodにアクセスして外からアクセスできるのかを確認
+
+```sh
+❯ kub run curl --image curlimages/curl --rm --stdin --tty --restart=Never --command -- curl 10.244.0.13:8080
+Hello, world!pod "curl" deleted
+```
+
+次はservice経由で接続確認してみましょう
+
+IPの情報を知らなくても、hello-server-externalというDNS名でアクセスできるはずです。
+
+```sh
+❯ kub run curl --image curlimages/curl --rm --stdin --tty --restart=Never --command -- curl hello-server-external:8080
+curl: (7) Failed to connect to hello-server-external port 8080 after 8 ms: Could not connect to server
+pod "curl" deleted
+pod default/curl terminated (Error)
+```
+
+connect to serverのエラーが出ているので、Serviceの設定に問題がある可能性があります。
+
+```sh
+❯ kub describe services
+Name:                     hello-server-external
+Namespace:                default
+Labels:                   <none>
+Annotations:              <none>
+Selector:                 app=hello-serve
+Type:                     NodePort
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       10.96.25.51
+IPs:                      10.96.25.51
+Port:                     <unset>  8080/TCP
+TargetPort:               8080/TCP
+NodePort:                 <unset>  30599/TCP
+Endpoints:
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Internal Traffic Policy:  Cluster
+Events:                   <none>
+
+
+Name:                     kubernetes
+Namespace:                default
+Labels:                   component=apiserver
+                          provider=kubernetes
+Annotations:              <none>
+Selector:                 <none>
+Type:                     ClusterIP
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       10.96.0.1
+IPs:                      10.96.0.1
+Port:                     https  443/TCP
+TargetPort:               6443/TCP
+Endpoints:                172.31.0.2:6443
+Session Affinity:         None
+Internal Traffic Policy:  Cluster
+Events:                   <none>
+```
+
+ServiceのSelectorに誤りがあることがわかります。
+app=hello-serveとなっていますが、正しくはapp=hello-serverです。
+
+diffで見てみましょう
+
+```sh
+❯ kub diff -f k8s/service-node-port.yml
+diff -u -N /var/folders/kr/z15pp29s0zj3m_17f2sddzhr0000gn/T/LIVE-3153552221/v1.Service.default.hello-server-external /var/folders/kr/z15pp29s0zj3m_17f2sddzhr0000gn/T/MERGED-410664411/v1.Service.default.hello-server-external
+--- /var/folders/kr/z15pp29s0zj3m_17f2sddzhr0000gn/T/LIVE-3153552221/v1.Service.default.hello-server-external	2026-05-30 01:29:36
++++ /var/folders/kr/z15pp29s0zj3m_17f2sddzhr0000gn/T/MERGED-410664411/v1.Service.default.hello-server-external	2026-05-30 01:29:36
+@@ -24,7 +24,7 @@
+     protocol: TCP
+     targetPort: 8080
+   selector:
+-    app: hello-serve
++    app: hello-server
+   sessionAffinity: None
+   type: NodePort
+ status:
+```
+
+### ConfigMapを作成してみよう
