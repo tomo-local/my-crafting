@@ -75,3 +75,7 @@ url-shortener:
 websocket-broker:
   - changed-files:
       - any-glob-to-any-file: "crafts/websocket-broker/**"
+
+gameboy-emulator:
+  - changed-files:
+      - any-glob-to-any-file: "crafts/gameboy-emulator/**"

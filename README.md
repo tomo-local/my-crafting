@@ -26,6 +26,7 @@ Each topic is organized by directory and may include multiple language implement
 | [Distributed Cache](./crafts/distributed-cache) | Go | Planned |
 | [Search Engine](./crafts/search-engine) | Go | Planned |
 | [Kafka Clone](./crafts/kafka-clone) | Go | Planned |
+| [Game Boy Emulator](./crafts/gameboy-emulator) | Go | Planned |
 
 ## Lab
 

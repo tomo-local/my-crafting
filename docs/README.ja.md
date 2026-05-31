@@ -24,6 +24,7 @@
 | [分散キャッシュ（一貫性ハッシュ）](../crafts/distributed-cache) | Go | 予定 |
 | [ミニ検索エンジン](../crafts/search-engine) | Go | 予定 |
 | [Kafka クローン（メッセージブローカー）](../crafts/kafka-clone) | Go | 予定 |
+| [Game Boy エミュレーター](../crafts/gameboy-emulator) | Go | 予定 |
 
 ## Lab
 
