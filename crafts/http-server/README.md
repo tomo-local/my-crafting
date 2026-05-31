@@ -5,6 +5,7 @@ Building an HTTP/1.1 server without using any HTTP libraries to understand the p
 ## Implementations
 
 - [Go](./go)
+- [Ruby](./ruby)
 - TypeScript (planned)
 
 ## Goals
