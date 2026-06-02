@@ -79,3 +79,7 @@ websocket-broker:
 gameboy-emulator:
   - changed-files:
       - any-glob-to-any-file: "crafts/gameboy-emulator/**"
+
+firestore:
+  - changed-files:
+      - any-glob-to-any-file: "crafts/firestore/**"
