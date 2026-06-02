@@ -1,33 +1,37 @@
 require 'socket'
+require 'logger'
 
-server = TCPServer.new(8080)
-puts "started 8080"
+def start_server(port, logger)
+  TCPServer.open(port)
+rescue Errno::EADDRINUSE => e
+  logger.error("Failed to start server: #{e.message}")
+  exit 1
+end
+
+def handle(socket, logger)
+  logger.info("Accepted connection from #{socket.remote_address.ip_address}:#{socket.remote_address.ip_port}")
+
+  body = "Hello, World!"
+  response = "HTTP/1.1 200 OK\r\nContent-Length: #{body.length}\r\nConnection: close\r\n\r\n#{body}"
+  socket.write(response)
+rescue Errno::ECONNRESET, Errno::EPIPE, EOFError => e
+  logger.warn("Client error: #{e.message}")
+ensure
+  socket.close
+end
+
+logger = Logger.new($stdout)
+server = start_server(8080, logger)
+logger.info("Server listening on 0.0.0.0:8080")
+
+trap("INT") do
+  logger.info("Server shutting down")
+  server.close
+  exit 0
+end
 
 loop do
-  socket = server.accept
-  puts "this is socket:"
-  puts socket
-  puts "================"
-
-  request_lines =  []
-  while (line = socket.gets) && line != "\r\n"
-    request_lines << line
-  end
-
-  puts "this is request header"
-  puts request_lines
-  puts "================"
-
-  response = <<~HTTP
-    HTTP/1.1 200 OK
-    Content-Length: 2
-    Connection: close
-
-    OK
-
-  HTTP
-
-  socket.write(response)
-  socket.close
-
+  handle(server.accept, logger)
+rescue Errno::EBADF
+  break
 end
