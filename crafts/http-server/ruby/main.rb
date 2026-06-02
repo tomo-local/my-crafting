@@ -1,37 +1,24 @@
 require 'socket'
 require 'logger'
+require_relative 'lib/server'
 
-def handle_conn(socket, logger)
+LOG = Logger.new($stdout)
+
+def handle_conn(socket)
   body = "Hello, World!"
-  response = <<~HTTP
-  HTTP/1.1 200 OK
-  Content-Length: #{body.length}
 
-  #{body}
-  HTTP
+  response = "HTTP/1.1 200 OK" + "\r\n" +
+    "Content-Length: #{body.length}" + "\r\n" +
+    "\r\n" +
+    "#{body}"
 
   socket.write(response)
 rescue => e
-  logger.error("Handle error", exception: e)
+  LOG.error("Handle error: #{e}")
 ensure
   socket.close
 end
 
+server = HttpServer::Server.new(8080, method(:handle_conn))
 
-logger = Logger.new($stdout)
-server = TCPServer.open(8080)
-logger.info("Server listening on 0.0.0.0:8080")
-
-begin
-  loop do
-    socket = server.accept
-    logger.info("Accepted connection from #{socket.remote_address.ip_address}:#{socket.remote_address.ip_port}")
-
-    handle_conn(socket, logger)
-
-  end
-rescue Interrupt
-  logger.info("Server shutting down")
-ensure
-  server.close
-end
+server.listen_and_serve
