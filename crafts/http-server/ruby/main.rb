@@ -26,12 +26,11 @@ def handle_conn(socket, logger)
   Content-Length: #{body.length}
 
   #{body}
-
   HTTP
 
   socket.write(response)
-  rescue => e
-    logger.error("Handle error", exception: e)
-    socket.close
-  end
+rescue => e
+  logger.error("Handle error", exception: e)
+ensure
+  socket.close
 end
