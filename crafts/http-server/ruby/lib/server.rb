@@ -1,5 +1,6 @@
 require 'socket'
 require_relative 'request'
+require_relative 'response'
 
 module HttpServer
   class Server
@@ -28,7 +29,9 @@ module HttpServer
         request = HttpServer::Request.parse(socket)
         LOG.info("Received #{request.inspect}")
         keep_alive = request.wants_keep_alive?
-        @handler.call(socket, request)
+        res = HttpServer::Response.new(socket)
+        res.set_keep_alive(keep_alive)
+        @handler.call(request, res)
         break unless keep_alive
       end
     rescue HttpServer::ConnectionClosed

@@ -4,9 +4,9 @@ require_relative 'lib/server'
 
 LOG = Logger.new($stdout)
 
-def handle_conn(socket, req)
+def handle_conn(req, res)
   status, body = case
-  when req.method == "POST" && req.content_length <=0
+  when req.method == "POST" && req.content_length <= 0
     ["400 Bad Request", "Bad Request"]
   when req.method == "POST" && req.path == "/echo"
     ["200 OK", req.body]
@@ -18,15 +18,7 @@ def handle_conn(socket, req)
     ["404 Not Found", "Not Found"]
   end
 
-  connection = req.wants_keep_alive? ? "keep-alive" : "close"
-
-  response = "HTTP/1.1 #{status}" + "\r\n" +
-    "Connection: #{connection}" + "\r\n" +
-    "Content-Length: #{body.bytesize}" + "\r\n" +
-    "\r\n" +
-    "#{body}"
-
-  socket.write(response)
+  res.write(status, body)
 rescue => e
   LOG.error("Handle error: #{e}")
 end
