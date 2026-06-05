@@ -18,8 +18,10 @@ def handle_conn(socket, req)
     ["404 Not Found", "Not Found"]
   end
 
+  connection = req.wants_keep_alive? ? "keep-alive" : "close"
+
   response = "HTTP/1.1 #{status}" + "\r\n" +
-    "Connection: close" + "\r\n" +
+    "Connection: #{connection}" + "\r\n" +
     "Content-Length: #{body.bytesize}" + "\r\n" +
     "\r\n" +
     "#{body}"
