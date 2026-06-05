@@ -1,12 +1,14 @@
 module HttpServer
   class Request
-    attr_reader :method, :path, :version, :connection
+    attr_reader :method, :path, :version, :connection, :content_length, :body
 
-    def initialize(method:, path:, version:, connection: "")
+    def initialize(method:, path:, version:, connection: "", content_length:, body:)
       @method = method
       @path = path
       @version = version
       @connection = connection
+      @content_length = content_length
+      @body = body
     end
 
     def self.parse(socket)
@@ -17,6 +19,7 @@ module HttpServer
       raise "Invalid request line: #{first_line}" unless fields.size == 3
 
       connection = ""
+      content_length = 0
       loop do
         header = socket.gets
         break if header.nil? || header == "\r\n"
@@ -27,10 +30,21 @@ module HttpServer
         case name.downcase
         when "connection"
           connection = value.strip.downcase
+        when "content-length"
+          content_length = value.strip.to_i
         end
       end
 
-      return new(method: fields[0], path: fields[1], version: fields[2], connection: connection)
+      body = content_length&.positive? ? socket.read(content_length) : ""
+
+      return new(
+        method: fields[0],
+        path: fields[1],
+        version: fields[2],
+        connection: connection,
+        content_length: content_length,
+        body: body
+      )
     end
 
     def wants_keep_alive?

@@ -5,15 +5,21 @@ require_relative 'lib/server'
 LOG = Logger.new($stdout)
 
 def handle_conn(socket, req)
-
-  status, body = case req.path
-  when "/" then ["200 OK", "Hello, World!"]
-  when "/about" then ["200 OK", "About page"]
-  else ["404 Not Found", "Not Found"]
+  status, body = case
+  when req.method == "POST" && req.content_length <=0
+    ["400 Bad Request", "Bad Request"]
+  when req.method == "POST" && req.path == "/echo"
+    ["200 OK", req.body]
+  when req.method == "GET" && req.path == "/"
+    ["200 OK", "Hello, World!"]
+  when req.method == "GET" && req.path == "/about"
+    ["200 OK", "About page"]
+  else
+    ["404 Not Found", "Not Found"]
   end
 
   response = "HTTP/1.1 #{status}" + "\r\n" +
-    "Connection: #{req.connection}" + "\r\n" +
+    "Connection: close" + "\r\n" +
     "Content-Length: #{body.bytesize}" + "\r\n" +
     "\r\n" +
     "#{body}"
