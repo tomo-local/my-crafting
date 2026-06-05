@@ -27,7 +27,7 @@ module HttpServer
         break if header.nil? || header == "\r\n"
 
         name, value = header.split(":", 2)
-        next if value.nil?
+        next if name.nil? || value.nil?
 
         case name.downcase
         when "connection"
@@ -37,7 +37,7 @@ module HttpServer
         end
       end
 
-      body = content_length&.positive? ? socket.read(content_length) : ""
+      body = content_length.positive? ? (socket.read(content_length) || "") : ""
 
       return new(
         method: fields[0],

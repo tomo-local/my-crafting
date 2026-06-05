@@ -1,0 +1,43 @@
+module HttpServer
+  class ConnectionClosed < StandardError
+  end
+
+  class Request
+    attr_reader method: String
+    attr_reader path: String
+    attr_reader version: String
+    attr_reader connection: String
+    attr_reader content_length: Integer
+    attr_reader body: String
+
+    def initialize: (
+      method: String,
+      path: String,
+      version: String,
+      connection: String,
+      content_length: Integer,
+      body: String
+    ) -> void
+
+    def self.parse: (TCPSocket socket) -> Request
+
+    def wants_keep_alive?: () -> bool
+
+    def inspect: () -> String
+  end
+
+  class Response
+    def initialize: (TCPSocket socket) -> void
+    def set_keep_alive: (bool value) -> void
+    def write: (String status, String body) -> void
+  end
+
+  class Server
+    def initialize: (Integer port, ^(Request, Response) -> void handler) -> void
+    def listen_and_serve: () -> void
+
+    private
+
+    def serve_conn: (TCPSocket socket) -> void
+  end
+end

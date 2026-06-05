@@ -1,0 +1,7 @@
+LOG: Logger
+
+class Object
+  private
+
+  def handle_conn: (HttpServer::Request req, HttpServer::Response res) -> void
+end
