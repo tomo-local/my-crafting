@@ -23,6 +23,6 @@ rescue => e
   LOG.error("Handle error: #{e}")
 end
 
-server = HttpServer::Server.new(8080, method(:handle_conn))
+server = HttpServer::Server.new(8080, ->(req, res) { handle_conn(req, res) })
 
 server.listen_and_serve

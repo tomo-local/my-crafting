@@ -1,0 +1,9 @@
+target :lib do
+  signature "sig"
+
+  check "lib"
+  check "main.rb"
+
+  library "socket"
+  library "logger"
+end
