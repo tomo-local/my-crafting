@@ -15,7 +15,8 @@ Each topic is organized by directory and may include multiple language implement
 | [react-mini-jotai](./crafts/react-mini-jotai) | TypeScript | ✅ |
 | [react-mini-xstate](./crafts/react-mini-xstate) | TypeScript | ✅ |
 | [react-mini-valtio](./crafts/react-mini-valtio) | TypeScript | ✅ |
-| [HTTP Server](./crafts/http-server) | Go | ✅ |
+| [HTTP Server](./crafts/http-server/go) | Go | ✅ |
+| [HTTP Server](./crafts/http-server/ruby) | Ruby | ✅ |
 | [Reverse Proxy / Load Balancer](./crafts/reverse-proxy) | Go | 🚧 |
 | [Pub/Sub Broker](./crafts/pub-sub) | Go | 🚧 |
 | [Rate Limiter](./crafts/rate-limiter) | Go | Planned |
