@@ -1,4 +1,5 @@
 require 'socket'
+require_relative 'request'
 
 module HttpServer
   class Server
@@ -13,12 +14,17 @@ module HttpServer
       loop do
         socket = server.accept
         LOG.info("Accepted connection from #{socket.remote_address.ip_address}:#{socket.remote_address.ip_port}")
-        @handler.call(socket)
+
+        request = HttpServer::Request.parse(socket)
+        keep_alive = request.wants_keep_alive?
+        @handler.call(socket, request)
+
+        socket.close unless keep_alive
       end
     rescue Interrupt
       LOG.info("Server shutting down")
     ensure
-      server.close
+      server&.close
     end
   end
 end
