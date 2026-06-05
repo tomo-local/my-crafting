@@ -19,9 +19,7 @@ module HttpServer
         keep_alive = request.wants_keep_alive?
         @handler.call(socket, request)
 
-        if keep_alive
-          server&.close
-        end
+        socket.close unless keep_alive
       end
     rescue Interrupt
       LOG.info("Server shutting down")

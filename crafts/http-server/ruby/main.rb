@@ -20,8 +20,6 @@ def handle_conn(socket, req)
   socket.write(response)
 rescue => e
   LOG.error("Handle error: #{e}")
-ensure
-  socket.close
 end
 
 server = HttpServer::Server.new(8080, method(:handle_conn))
