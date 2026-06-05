@@ -59,7 +59,7 @@ module HttpServer
     end
 
     def inspect
-      return "#<Request method=#{@method} path=#{@path} version=#{@version}>"
+      return "<Request method=#{@method} path=#{@path} version=#{@version} content-length=#{@content_length} body=#{@body}>"
     end
 
   end

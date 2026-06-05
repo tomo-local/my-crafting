@@ -16,6 +16,8 @@ module HttpServer
         LOG.info("Accepted connection from #{socket.remote_address.ip_address}:#{socket.remote_address.ip_port}")
 
         request = HttpServer::Request.parse(socket)
+        LOG.info("Received #{request.inspect}")
+
         keep_alive = request.wants_keep_alive?
         @handler.call(socket, request)
 
