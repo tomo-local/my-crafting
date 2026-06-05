@@ -4,17 +4,9 @@ require_relative 'lib/server'
 
 LOG = Logger.new($stdout)
 
-def handle_conn(socket)
-  first_line = socket.gets&.chomp
-  raise "connection closed" if first_line.nil?
+def handle_conn(socket, req)
 
-  fields = first_line.split(' ')
-
-  if fields.size != 3
-    raise "Invalid request line: #{first_line}"
-  end
-
-  status, body = case fields[1]
+  status, body = case req.path
   when "/" then ["200 OK", "Hello, World!"]
   when "/about" then ["200 OK", "About page"]
   else ["404 Not Found", "Not Found"]
