@@ -13,6 +13,7 @@ def handle_conn(socket, req)
   end
 
   response = "HTTP/1.1 #{status}" + "\r\n" +
+    "Connection: #{req.connection}" + "\r\n" +
     "Content-Length: #{body.bytesize}" + "\r\n" +
     "\r\n" +
     "#{body}"
