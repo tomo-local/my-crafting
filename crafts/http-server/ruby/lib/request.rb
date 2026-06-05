@@ -1,4 +1,6 @@
 module HttpServer
+  class ConnectionClosed < StandardError; end
+
   class Request
     attr_reader :method, :path, :version, :connection, :content_length, :body
 
@@ -13,7 +15,7 @@ module HttpServer
 
     def self.parse(socket)
       first_line = socket.gets&.chomp
-      raise "connection closed" if first_line.nil?
+      raise ConnectionClosed if first_line.nil?
 
       fields = first_line.split(' ')
       raise "Invalid request line: #{first_line}" unless fields.size == 3
