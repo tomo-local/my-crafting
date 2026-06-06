@@ -11,20 +11,21 @@ import (
 )
 
 type Args struct {
-	id   string
-	port string
+	id         string
+	port       string
+	echoHeader bool
 }
 
 func main() {
 	args := parseArgs()
-	fmt.Printf("Args id:%s, port:%s\r\n", args.id, args.port)
+	fmt.Printf("Args id:%s, port:%s echo-header:%b\r\n", args.id, args.port, args.echoHeader)
 
 	addr := args.port
 	if !strings.HasPrefix(args.port, ":") {
 		addr = ":" + args.port
 	}
 
-	srv := server.NewHTTPServer(addr, &UpstreamHandler{Id: args.id})
+	srv := server.NewHTTPServer(addr, &UpstreamHandler{Id: args.id, EchoHeader: args.echoHeader})
 
 	if err := srv.ListenAndServe(); err != nil {
 		slog.Error("server failed", "err", err)
@@ -35,20 +36,30 @@ func main() {
 func parseArgs() Args {
 	id := flag.String("id", "upstream-1", "接続先のアドレス")
 	port := flag.String("port", "8080", "サーバーのポート")
+	echoHeader := flag.Bool("echo-header", true, "")
+
 	flag.Parse()
 
 	return Args{
-		id:   *id,
-		port: *port,
+		id:         *id,
+		port:       *port,
+		echoHeader: *echoHeader,
 	}
 }
 
 type UpstreamHandler struct {
-	Id string
+	Id         string
+	EchoHeader bool
 }
 
 func (r *UpstreamHandler) ServerHTTP(req server.Request, write server.Write) {
+	if r.EchoHeader {
+		for key, values := range req.Header {
+			fmt.Printf("%s: %s\n", key, strings.Join(values, ", "))
+		}
+	}
+
 	write(server.StatusOK, "Hello, "+r.Id+"!")
 }
 
-func (r *UpstreamHandler) ServerReverseProxy(conn net.Conn) {}
+func (r *UpstreamHandler) ServerReverseProxy(req server.Request, conn net.Conn) {}

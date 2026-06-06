@@ -7,6 +7,7 @@ import (
 	"io"
 	"log/slog"
 	"net"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -14,7 +15,7 @@ import (
 
 type Handler interface {
 	ServerHTTP(req Request, writeResponse Write)
-	ServerReverseProxy(conn net.Conn)
+	ServerReverseProxy(req Request, conn net.Conn)
 }
 
 type Server struct {
@@ -100,11 +101,6 @@ func (s *Server) trackListener(ln net.Listener, add bool) error {
 func (s *Server) ServeConn(conn net.Conn) {
 	defer conn.Close()
 
-	if s.ReverseProxy {
-		s.Handler.ServerReverseProxy(conn)
-		return
-	}
-
 	reader := bufio.NewReader(conn)
 	addr := conn.RemoteAddr()
 	slog.Info("start serving connection", "addr", addr)
@@ -125,6 +121,12 @@ func (s *Server) ServeConn(conn net.Conn) {
 
 		slog.Info("request received", "method", req.Method, "path", req.Path, "version", req.Version)
 		keepAlive := req.WantsKeepAlive()
+
+		if s.ReverseProxy {
+			s.Handler.ServerReverseProxy(req, conn)
+			return
+		}
+
 		res := NewResponse(conn)
 		res.SetKeepAlive(keepAlive)
 		s.Handler.ServerHTTP(req, res.Write)
@@ -139,8 +141,10 @@ type Request struct {
 	Method        string
 	Path          string
 	Version       string
+	Host          string
 	ContentLength int
 	Connection    string
+	Header        http.Header
 	Body          io.Reader
 }
 
@@ -162,6 +166,9 @@ func NewRequest(r io.Reader) (Request, error) {
 
 	contentLength := 0
 	connection := ""
+	host := ""
+	headers := make(http.Header)
+
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil {
@@ -169,6 +176,13 @@ func NewRequest(r io.Reader) (Request, error) {
 		}
 		if line == "\r\n" {
 			break
+		}
+
+		parts := strings.SplitN(line, ":", 2)
+		if len(parts) == 2 {
+			name := strings.TrimSpace(parts[0])
+			value := strings.TrimSpace(parts[1])
+			headers.Set(name, value)
 		}
 
 		lower := strings.ToLower(line)
@@ -183,15 +197,21 @@ func NewRequest(r io.Reader) (Request, error) {
 		case strings.HasPrefix(lower, "connection:"):
 			parts := strings.SplitN(line, ":", 2)
 			connection = strings.ToLower(strings.TrimSpace(parts[1]))
+		case strings.HasPrefix(lower, "host:"):
+			parts := strings.SplitN(line, ":", 2)
+			host = strings.TrimSpace(parts[1])
 		}
+
 	}
 
 	return Request{
 		Method:        fields[0],
 		Path:          fields[1],
 		Version:       fields[2],
+		Host:          host,
 		ContentLength: contentLength,
 		Connection:    connection,
+		Header:        headers,
 		Body:          reader,
 	}, nil
 }
@@ -204,6 +224,15 @@ func (r Request) WantsKeepAlive() bool {
 		return r.Connection == "keep-alive"
 	}
 	return false
+}
+
+func (r Request) Write(w io.Writer) error {
+	fmt.Fprintf(w, "%s %s %s\r\n", r.Method, r.Path, r.Version)
+	if err := r.Header.Write(w); err != nil {
+		return err
+	}
+	_, err := fmt.Fprintf(w, "\r\n")
+	return err
 }
 
 type Response struct {
