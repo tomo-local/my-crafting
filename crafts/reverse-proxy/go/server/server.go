@@ -14,20 +14,21 @@ import (
 
 type Handler interface {
 	ServerHTTP(req Request, writeResponse Write)
+	ServerReverseProxy(conn net.Conn)
 }
 
 type Server struct {
-	Addr     string
-	Handler  Handler
-	listener net.Listener
+	Addr         string
+	Handler      Handler
+	listener     net.Listener
+	ReverseProxy bool
 }
-
-const ()
 
 func NewHTTPServer(addr string, handler Handler) *Server {
 	return &Server{
-		Addr:    addr,
-		Handler: handler,
+		Addr:         addr,
+		Handler:      handler,
+		ReverseProxy: false,
 	}
 }
 
@@ -38,6 +39,10 @@ func (s *Server) Close() error {
 	}
 
 	return s.listener.Close()
+}
+
+func (s *Server) SetReverseProxy() {
+	s.ReverseProxy = true
 }
 
 var ErrServerClosed = errors.New("server: Server closed")
@@ -54,14 +59,15 @@ func (s *Server) ListenAndServe() error {
 	}
 
 	ln, err := net.Listen("tcp", addr)
+	slog.Info("Stated server addr", "addr", addr)
 	if err != nil {
 		return fmt.Errorf("failed to listen on %s: %w", s.Addr, err)
 	}
 
-	return s.Serve(ln)
+	return s.serve(ln)
 }
 
-func (s *Server) Serve(l net.Listener) error {
+func (s *Server) serve(l net.Listener) error {
 	if s.trackListener(l, true) != nil {
 		return ErrServerClosed
 	}
@@ -93,6 +99,11 @@ func (s *Server) trackListener(ln net.Listener, add bool) error {
 
 func (s *Server) ServeConn(conn net.Conn) {
 	defer conn.Close()
+
+	if s.ReverseProxy {
+		s.Handler.ServerReverseProxy(conn)
+		return
+	}
 
 	reader := bufio.NewReader(conn)
 	addr := conn.RemoteAddr()
