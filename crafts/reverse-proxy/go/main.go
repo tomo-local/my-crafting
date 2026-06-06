@@ -6,6 +6,7 @@ import (
 	"io"
 	"log/slog"
 	"net"
+	"net/http"
 	"os"
 	"reverse-proxy/server"
 	"strings"
@@ -51,7 +52,7 @@ type ReverseProxyHandler struct {
 
 func (r *ReverseProxyHandler) ServerHTTP(req server.Request, write server.Write) {}
 
-func (r *ReverseProxyHandler) ServerReverseProxy(conn net.Conn) {
+func (r *ReverseProxyHandler) ServerReverseProxy(req server.Request, conn net.Conn) {
 	upstreamConn, err := net.Dial("tcp", r.Upstream)
 	if err != nil {
 		slog.Error("Reverse Proxy Error")
@@ -59,10 +60,22 @@ func (r *ReverseProxyHandler) ServerReverseProxy(conn net.Conn) {
 	}
 	defer upstreamConn.Close()
 
-	done := make(chan struct{}, 2)
+	// カスタムした reqなのでSetで書き換わる
+	req.Host = "upstream"
+	req.Header.Set("Host", r.Upstream)
 
+	removeHopByHopHeaders(req.Header)
+	clientIP, _, _ := net.SplitHostPort(conn.RemoteAddr().String())
+	if prior := req.Header.Get("X-Forwarded-For"); prior != "" {
+		clientIP = prior + ", " + clientIP
+	}
+	req.Header.Set("X-Forwarded-For", clientIP)
+	req.Header.Set("Via", "1.1 reverse-proxy")
+	req.Write(upstreamConn)
+
+	done := make(chan struct{}, 2)
 	go func() {
-		io.Copy(upstreamConn, conn)
+		io.Copy(upstreamConn, req.Body)
 		upstreamConn.(*net.TCPConn).CloseWrite()
 		done <- struct{}{}
 	}()
@@ -73,4 +86,20 @@ func (r *ReverseProxyHandler) ServerReverseProxy(conn net.Conn) {
 	}()
 	<-done
 	<-done
+}
+
+var hopByHopHeaders = []string{
+	"Connection", "Keep-Alive", "Proxy-Authenticate", "Proxy-Authorization",
+	"TE", "Trailers", "Transfer-Encoding", "Upgrade",
+}
+
+func removeHopByHopHeaders(header http.Header) {
+	connection := header.Get("Connection")
+	for _, key := range strings.Split(connection, ",") {
+		header.Del(strings.TrimSpace(key))
+	}
+
+	for _, key := range hopByHopHeaders {
+		header.Del(key)
+	}
 }

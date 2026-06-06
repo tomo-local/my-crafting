@@ -120,10 +120,13 @@ curl -s http://localhost:8080/
 
 期待する出力（ヘッダーの一部）:
 ```
-X-Forwarded-For: 127.0.0.1
+X-Forwarded-For: 127.0.0.1  # curl 127.0.0.1:8080 の場合
+X-Forwarded-For: ::1         # curl localhost:8080 の場合（macOS は IPv6 で解決されるため）
 Via: 1.1 reverse-proxy
 Host: localhost:9001
 ```
+
+> **注意**: macOS では `localhost` が IPv6 (`::1`) で解決されるため、`curl localhost:8080` を使うと `X-Forwarded-For: ::1` になります。`127.0.0.1` を確認したい場合は `curl 127.0.0.1:8080` で明示的に IPv4 を指定してください。
 
 ### ステップ 3: `Host` がプロキシのアドレスでないことを確認
 
