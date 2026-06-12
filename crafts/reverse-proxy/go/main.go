@@ -26,8 +26,7 @@ func main() {
 		addr = ":" + args.port
 	}
 
-	srv := server.NewHTTPServer(addr, &ReverseProxyHandler{Upstream: args.upstream})
-	srv.SetReverseProxy()
+	srv := server.NewReverseProxyServer(addr, &ReverseProxyHandler{Upstream: args.upstream})
 
 	if err := srv.ListenAndServe(); err != nil {
 		slog.Error("server failed", "err", err)
@@ -95,7 +94,7 @@ var hopByHopHeaders = []string{
 
 func removeHopByHopHeaders(header http.Header) {
 	connection := header.Get("Connection")
-	for _, key := range strings.Split(connection, ",") {
+	for key := range strings.SplitSeq(connection, ",") {
 		header.Del(strings.TrimSpace(key))
 	}
 

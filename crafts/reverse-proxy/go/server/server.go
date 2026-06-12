@@ -30,6 +30,14 @@ func NewHTTPServer(addr string, handler Handler) *Server {
 	}
 }
 
+func NewReverseProxyServer(addr string, handler Handler) *Server {
+	return &Server{
+		Addr:         addr,
+		Handler:      handler,
+		ReverseProxy: true,
+	}
+}
+
 func (s *Server) Close() error {
 	if s.listener == nil {
 		// The Close operation will not be executed because the server has not started yet.
@@ -37,10 +45,6 @@ func (s *Server) Close() error {
 	}
 
 	return s.listener.Close()
-}
-
-func (s *Server) SetReverseProxy() {
-	s.ReverseProxy = true
 }
 
 var ErrServerClosed = errors.New("server: Server closed")
