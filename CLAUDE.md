@@ -33,14 +33,6 @@ git submodule update --remote <path>
 | `lab/lib/` | ライブラリ/ランタイム学習（git submodule）|
 | `lab/infra/` | インフラ演習（Kubernetes break-fix）|
 
-## スキル
-
-| コマンド | 役割 |
-|---|---|
-| `/new-craft` | 新しいクラフトをスキャフォールド |
-| `/craft-learning-plan` | `docs/` に学習ドキュメント群を生成 |
-| `/review-and-issue` | コード分析してGitHub Issueを作成 |
-
 ## PR ラベリング
 
 `.github/labeler.yml` がファイルパスに基づいてPRへ自動ラベルを付与する。新しいクラフトを追加する際は同ファイルへのエントリ追加も必要。
