@@ -18,7 +18,7 @@ type Args struct {
 
 func main() {
 	args := parseArgs()
-	fmt.Printf("Args id:%s, port:%s echo-header:%b\r\n", args.id, args.port, args.echoHeader)
+	fmt.Printf("Args id:%s, port:%s echo-header:%v\r\n", args.id, args.port, args.echoHeader)
 
 	addr := args.port
 	if !strings.HasPrefix(args.port, ":") {
