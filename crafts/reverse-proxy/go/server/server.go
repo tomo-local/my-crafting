@@ -7,12 +7,13 @@ import (
 	"io"
 	"log/slog"
 	"net"
+	"reverse-proxy/balancer"
 	"time"
 )
 
 type Handler interface {
 	ServerHTTP(req Request, writeResponse Write)
-	ServerReverseProxy(req Request, conn net.Conn)
+	ServerReverseProxy(req Request, conn net.Conn, upstreamConn net.Conn)
 }
 
 type Server struct {
@@ -20,6 +21,7 @@ type Server struct {
 	Handler      Handler
 	listener     net.Listener
 	ReverseProxy bool
+	RoundRobin   balancer.RoundRobin
 }
 
 func NewHTTPServer(addr string, handler Handler) *Server {
@@ -30,11 +32,12 @@ func NewHTTPServer(addr string, handler Handler) *Server {
 	}
 }
 
-func NewReverseProxyServer(addr string, handler Handler) *Server {
+func NewReverseProxyServer(addr string, handler Handler, upstreams []string) *Server {
 	return &Server{
 		Addr:         addr,
 		Handler:      handler,
 		ReverseProxy: true,
+		RoundRobin:   *balancer.NewRoundRobin(upstreams),
 	}
 }
 
@@ -81,7 +84,6 @@ func (s *Server) serve(l net.Listener) error {
 			continue
 		}
 		slog.Info("connection accepted", "remote_addr", conn.RemoteAddr())
-
 		go s.ServeConn(conn)
 	}
 }
@@ -124,7 +126,17 @@ func (s *Server) ServeConn(conn net.Conn) {
 		keepAlive := req.WantsKeepAlive()
 
 		if s.ReverseProxy {
-			s.Handler.ServerReverseProxy(req, conn)
+			upstream := s.RoundRobin.Next()
+			upstreamConn, err := net.Dial("tcp", upstream)
+			if err != nil {
+				slog.Error("Reverse Proxy Error")
+				return
+			}
+			defer upstreamConn.Close()
+
+			req.Host = "upstream"
+			req.Header.Set("Host", upstream)
+			s.Handler.ServerReverseProxy(req, conn, upstreamConn)
 			return
 		}
 

@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"log/slog"
 	"net"
 	"net/http"
@@ -13,20 +14,20 @@ import (
 )
 
 type Args struct {
-	upstream string
-	port     string
+	upstreams []string
+	port      string
 }
 
 func main() {
 	args := parseArgs()
-	fmt.Printf("Args upstream:%s, port:%s\r\n", args.upstream, args.port)
+	fmt.Printf("Args upstreams:%s, port:%s\r\n", args.upstreams, args.port)
 
 	addr := args.port
 	if !strings.HasPrefix(args.port, ":") {
 		addr = ":" + args.port
 	}
 
-	srv := server.NewReverseProxyServer(addr, &ReverseProxyHandler{Upstream: args.upstream})
+	srv := server.NewReverseProxyServer(addr, &ReverseProxyHandler{}, args.upstreams)
 
 	if err := srv.ListenAndServe(); err != nil {
 		slog.Error("server failed", "err", err)
@@ -35,34 +36,28 @@ func main() {
 }
 
 func parseArgs() Args {
-	upstream := flag.String("upstream", "localhost:9001", "接続先のアドレス")
+	upstreamsFlag := flag.String("upstreams", "localhost:9001,localhost:9002", "接続先のアドレス")
 	port := flag.String("port", "8080", "サーバーのポート")
 	flag.Parse()
 
+	upstreams := strings.Split(*upstreamsFlag, ",")
+
+	if len(upstreams) == 0 {
+		log.Fatal("no upstreams specified")
+	}
+
 	return Args{
-		upstream: *upstream,
-		port:     *port,
+		upstreams: upstreams,
+		port:      *port,
 	}
 }
 
 type ReverseProxyHandler struct {
-	Upstream string
 }
 
 func (r *ReverseProxyHandler) ServerHTTP(req server.Request, write server.Write) {}
 
-func (r *ReverseProxyHandler) ServerReverseProxy(req server.Request, conn net.Conn) {
-	upstreamConn, err := net.Dial("tcp", r.Upstream)
-	if err != nil {
-		slog.Error("Reverse Proxy Error")
-		return
-	}
-	defer upstreamConn.Close()
-
-	// カスタムした reqなのでSetで書き換わる
-	req.Host = "upstream"
-	req.Header.Set("Host", r.Upstream)
-
+func (r *ReverseProxyHandler) ServerReverseProxy(req server.Request, conn net.Conn, upstreamConn net.Conn) {
 	removeHopByHopHeaders(req.Header)
 	clientIP, _, _ := net.SplitHostPort(conn.RemoteAddr().String())
 	if prior := req.Header.Get("X-Forwarded-For"); prior != "" {
