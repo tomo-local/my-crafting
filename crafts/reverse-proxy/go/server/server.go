@@ -32,13 +32,18 @@ func NewHTTPServer(addr string, handler Handler) *Server {
 	}
 }
 
-func NewReverseProxyServer(addr string, handler Handler, upstreams []string) *Server {
+func NewReverseProxyServer(addr string, handler Handler, upstreams []string) (*Server, error) {
+	r, err := balancer.NewRoundRobin(upstreams)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create round robin: %w", err)
+	}
+
 	return &Server{
 		Addr:         addr,
 		Handler:      handler,
 		ReverseProxy: true,
-		RoundRobin:   *balancer.NewRoundRobin(upstreams),
-	}
+		RoundRobin:   *r,
+	}, nil
 }
 
 func (s *Server) Close() error {
@@ -61,6 +66,10 @@ func (s *Server) ListenAndServe() error {
 	addr := s.Addr
 	if addr == "" {
 		addr = ":http"
+	}
+
+	if s.ReverseProxy {
+		s.RoundRobin.StartHealthCheck(10 * time.Second)
 	}
 
 	ln, err := net.Listen("tcp", addr)
@@ -126,7 +135,15 @@ func (s *Server) ServeConn(conn net.Conn) {
 		keepAlive := req.WantsKeepAlive()
 
 		if s.ReverseProxy {
-			upstream := s.RoundRobin.Next()
+			upstream, err := s.RoundRobin.Next()
+			if err != nil {
+				slog.Error("no available upstream:", "err", err)
+				res := NewResponse(conn)
+				res.SetKeepAlive(keepAlive)
+				res.Write(StatusBadGateway, "Bad Gateway")
+				return
+			}
+
 			upstreamConn, err := net.Dial("tcp", upstream)
 			if err != nil {
 				slog.Error("Reverse Proxy Error")

@@ -27,7 +27,12 @@ func main() {
 		addr = ":" + args.port
 	}
 
-	srv := server.NewReverseProxyServer(addr, &ReverseProxyHandler{}, args.upstreams)
+	srv, err := server.NewReverseProxyServer(addr, &ReverseProxyHandler{}, args.upstreams)
+
+	if err != nil {
+		slog.Error("failed to create server", "err", err)
+		os.Exit(1)
+	}
 
 	if err := srv.ListenAndServe(); err != nil {
 		slog.Error("server failed", "err", err)

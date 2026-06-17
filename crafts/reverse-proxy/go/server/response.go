@@ -18,6 +18,7 @@ const (
 	StatusBadRequest          StatusCode = "400 Bad Request"
 	StatusNotFound            StatusCode = "404 Not Found"
 	StatusInternalServerError StatusCode = "500 Internal Server Error"
+	StatusBadGateway          StatusCode = "502 Bad Gateway"
 )
 
 func NewResponse(conn net.Conn) *Response {
