@@ -18,6 +18,7 @@ const (
 	StatusBadRequest          StatusCode = "400 Bad Request"
 	StatusNotFound            StatusCode = "404 Not Found"
 	StatusInternalServerError StatusCode = "500 Internal Server Error"
+	StatusBadGateway          StatusCode = "502 Bad Gateway"
 )
 
 func NewResponse(conn net.Conn) *Response {
@@ -42,5 +43,9 @@ func (r *Response) Write(status StatusCode, body string) error {
 		body
 
 	_, err := r.conn.Write([]byte(response))
-	return fmt.Errorf("fail write err: %v", err)
+
+	if err != nil {
+		return fmt.Errorf("fail write response: %w", err)
+	}
+	return nil
 }

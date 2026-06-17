@@ -7,12 +7,13 @@ import (
 	"io"
 	"log/slog"
 	"net"
+	"reverse-proxy/balancer"
 	"time"
 )
 
 type Handler interface {
 	ServerHTTP(req Request, writeResponse Write)
-	ServerReverseProxy(req Request, conn net.Conn)
+	ServerReverseProxy(req Request, conn net.Conn, upstreamConn net.Conn)
 }
 
 type Server struct {
@@ -20,6 +21,7 @@ type Server struct {
 	Handler      Handler
 	listener     net.Listener
 	ReverseProxy bool
+	RoundRobin   balancer.RoundRobin
 }
 
 func NewHTTPServer(addr string, handler Handler) *Server {
@@ -30,12 +32,18 @@ func NewHTTPServer(addr string, handler Handler) *Server {
 	}
 }
 
-func NewReverseProxyServer(addr string, handler Handler) *Server {
+func NewReverseProxyServer(addr string, handler Handler, upstreams []string) (*Server, error) {
+	r, err := balancer.NewRoundRobin(upstreams)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create round robin: %w", err)
+	}
+
 	return &Server{
 		Addr:         addr,
 		Handler:      handler,
 		ReverseProxy: true,
-	}
+		RoundRobin:   *r,
+	}, nil
 }
 
 func (s *Server) Close() error {
@@ -60,6 +68,10 @@ func (s *Server) ListenAndServe() error {
 		addr = ":http"
 	}
 
+	if s.ReverseProxy {
+		s.RoundRobin.StartHealthCheck(10 * time.Second)
+	}
+
 	ln, err := net.Listen("tcp", addr)
 	slog.Info("Stated server addr", "addr", addr)
 	if err != nil {
@@ -81,7 +93,6 @@ func (s *Server) serve(l net.Listener) error {
 			continue
 		}
 		slog.Info("connection accepted", "remote_addr", conn.RemoteAddr())
-
 		go s.ServeConn(conn)
 	}
 }
@@ -124,7 +135,29 @@ func (s *Server) ServeConn(conn net.Conn) {
 		keepAlive := req.WantsKeepAlive()
 
 		if s.ReverseProxy {
-			s.Handler.ServerReverseProxy(req, conn)
+			upstream, err := s.RoundRobin.Next()
+			if err != nil {
+				slog.Error("no available upstream:", "err", err)
+				res := NewResponse(conn)
+				res.SetKeepAlive(keepAlive)
+				res.Write(StatusBadGateway, "Bad Gateway")
+				return
+			}
+
+			upstreamConn, err := net.Dial("tcp", upstream)
+			if err != nil {
+				slog.Error("failed to connect upstream", "upstream",
+					upstream, "err", err)
+				res := NewResponse(conn)
+				res.SetKeepAlive(keepAlive)
+				res.Write(StatusBadGateway, "Bad Gateway")
+				return
+			}
+			defer upstreamConn.Close()
+
+			req.Host = "upstream"
+			req.Header.Set("Host", upstream)
+			s.Handler.ServerReverseProxy(req, conn, upstreamConn)
 			return
 		}
 
