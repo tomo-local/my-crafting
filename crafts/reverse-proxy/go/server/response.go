@@ -43,5 +43,9 @@ func (r *Response) Write(status StatusCode, body string) error {
 		body
 
 	_, err := r.conn.Write([]byte(response))
-	return fmt.Errorf("fail write err: %v", err)
+
+	if err != nil {
+		return fmt.Errorf("fail write response: %w", err)
+	}
+	return nil
 }

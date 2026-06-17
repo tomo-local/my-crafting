@@ -146,7 +146,11 @@ func (s *Server) ServeConn(conn net.Conn) {
 
 			upstreamConn, err := net.Dial("tcp", upstream)
 			if err != nil {
-				slog.Error("Reverse Proxy Error")
+				slog.Error("failed to connect upstream", "upstream",
+					upstream, "err", err)
+				res := NewResponse(conn)
+				res.SetKeepAlive(keepAlive)
+				res.Write(StatusBadGateway, "Bad Gateway")
 				return
 			}
 			defer upstreamConn.Close()

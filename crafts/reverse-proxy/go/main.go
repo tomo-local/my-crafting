@@ -47,7 +47,7 @@ func parseArgs() Args {
 
 	upstreams := strings.Split(*upstreamsFlag, ",")
 
-	if len(upstreams) == 0 {
+	if len(upstreams) == 0 || upstreams[0] == "" {
 		log.Fatal("no upstreams specified")
 	}
 
