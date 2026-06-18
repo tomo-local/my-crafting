@@ -8,10 +8,11 @@ import (
 
 type RoundRobin struct {
 	upstreams []*Upstream
+	interval  time.Duration
 	counter   uint64
 }
 
-func NewRoundRobin(strUpstreams []string) (*RoundRobin, error) {
+func NewRoundRobin(strUpstreams []string, interval time.Duration) (Balancer, error) {
 	if len(strUpstreams) == 0 {
 		return nil, errors.New("upstreams must not be empty")
 	}
@@ -23,6 +24,7 @@ func NewRoundRobin(strUpstreams []string) (*RoundRobin, error) {
 
 	return &RoundRobin{
 		upstreams: upstreams,
+		interval:  interval,
 		counter:   0,
 	}, nil
 }
@@ -38,12 +40,12 @@ func (r *RoundRobin) Next() (string, error) {
 	return "", errors.New("no alive upstream")
 }
 
-func (r *RoundRobin) StartHealthCheck(interval time.Duration) {
+func (r *RoundRobin) StartHealthCheck() {
 	for _, u := range r.upstreams {
 		go func(u *Upstream) {
 			for {
 				u.CheckHealth()
-				time.Sleep(interval)
+				time.Sleep(r.interval)
 			}
 		}(u)
 	}

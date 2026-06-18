@@ -9,13 +9,36 @@ import (
 	"net"
 	"net/http"
 	"os"
+	lb "reverse-proxy/balancer"
 	"reverse-proxy/server"
 	"strings"
+	"time"
 )
 
 type Args struct {
 	upstreams []string
 	port      string
+	interval  int64
+}
+
+func parseArgs() Args {
+	port := flag.String("port", "8080", "サーバーのポート")
+	upstreamsFlag := flag.String("upstreams", "localhost:9001,localhost:9002", "接続先のアドレス")
+	interval := flag.Int64("interval", 10, "ヘルスチェックのインターバル")
+
+	flag.Parse()
+
+	upstreams := strings.Split(*upstreamsFlag, ",")
+
+	if len(upstreams) == 0 || upstreams[0] == "" {
+		log.Fatal("no upstreams specified")
+	}
+
+	return Args{
+		port:      *port,
+		upstreams: upstreams,
+		interval:  *interval,
+	}
 }
 
 func main() {
@@ -26,13 +49,15 @@ func main() {
 	if !strings.HasPrefix(args.port, ":") {
 		addr = ":" + args.port
 	}
-
-	srv, err := server.NewReverseProxyServer(addr, &ReverseProxyHandler{}, args.upstreams)
+	interval := time.Duration(args.interval) * time.Second
+	balancer, err := lb.NewRoundRobin(args.upstreams, interval)
 
 	if err != nil {
-		slog.Error("failed to create server", "err", err)
+		slog.Error("failed to create balancer", "err", err)
 		os.Exit(1)
 	}
+
+	srv := server.NewReverseProxyServer(addr, &ReverseProxyHandler{}, balancer)
 
 	if err := srv.ListenAndServe(); err != nil {
 		slog.Error("server failed", "err", err)
@@ -40,27 +65,8 @@ func main() {
 	}
 }
 
-func parseArgs() Args {
-	upstreamsFlag := flag.String("upstreams", "localhost:9001,localhost:9002", "接続先のアドレス")
-	port := flag.String("port", "8080", "サーバーのポート")
-	flag.Parse()
-
-	upstreams := strings.Split(*upstreamsFlag, ",")
-
-	if len(upstreams) == 0 || upstreams[0] == "" {
-		log.Fatal("no upstreams specified")
-	}
-
-	return Args{
-		upstreams: upstreams,
-		port:      *port,
-	}
-}
-
 type ReverseProxyHandler struct {
 }
-
-func (r *ReverseProxyHandler) ServerHTTP(req server.Request, write server.Write) {}
 
 func (r *ReverseProxyHandler) ServerReverseProxy(req server.Request, conn net.Conn, upstreamConn net.Conn) {
 	removeHopByHopHeaders(req.Header)

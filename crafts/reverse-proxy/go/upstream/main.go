@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"log/slog"
-	"net"
 	"os"
 	"reverse-proxy/server"
 	"strings"
@@ -62,5 +61,3 @@ func (r *UpstreamHandler) ServerHTTP(req server.Request, write server.Write) {
 	write(server.StatusOK, "Hello, "+r.Id+"!")
 }
 
-func (r *UpstreamHandler) ServerReverseProxy(req server.Request, conn net.Conn, upstreamConn net.Conn) {
-}
