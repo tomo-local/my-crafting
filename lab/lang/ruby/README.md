@@ -1,14 +1,12 @@
 # Ruby
 
-Learning Ruby from scratch.
+Learning Rails and architecture patterns.
 
 ## Structure
 
 | Directory | Topics |
 |-----------|--------|
-| [basics](./basics) | Types, variables, control flow, methods, blocks |
-| [oop](./oop) | Classes, modules, mixins, inheritance |
-| [meta](./meta) | Metaprogramming, method_missing, define_method |
+| [rails](./rails) | Phase 0: Rails 基礎 → Phase 1: アーキテクチャ学習 |
 
 ## Setup
 
