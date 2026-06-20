@@ -40,6 +40,6 @@
 [submodule "libraries/jotai"]
 	path = lab/lib/jotai
 	url = https://github.com/tomo-local/study-jotai
-[submodule "lab/lang/rails"]
-	path = lab/lang/rails
+[submodule "lab/lib/rails"]
+	path = lab/lib/rails
 	url = https://github.com/tomo-local/study-rails.git
