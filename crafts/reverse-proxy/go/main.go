@@ -19,12 +19,14 @@ type Args struct {
 	upstreams []string
 	port      string
 	interval  int64
+	balancer  int64
 }
 
 func parseArgs() Args {
 	port := flag.String("port", "8080", "サーバーのポート")
 	upstreamsFlag := flag.String("upstreams", "localhost:9001,localhost:9002", "接続先のアドレス")
 	interval := flag.Int64("interval", 10, "ヘルスチェックのインターバル")
+	b := flag.Int64("balancer", 0, "バランシングを使うのか(0:RoundRobin,1:LeastConn)")
 
 	flag.Parse()
 
@@ -38,6 +40,7 @@ func parseArgs() Args {
 		port:      *port,
 		upstreams: upstreams,
 		interval:  *interval,
+		balancer:  *b,
 	}
 }
 
@@ -50,7 +53,7 @@ func main() {
 		addr = ":" + args.port
 	}
 	interval := time.Duration(args.interval) * time.Second
-	balancer, err := lb.NewRoundRobin(args.upstreams, interval)
+	balancer, err := lb.NewBalancer(lb.Kind(args.balancer), args.upstreams, interval)
 
 	if err != nil {
 		slog.Error("failed to create balancer", "err", err)

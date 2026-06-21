@@ -3,13 +3,15 @@ package balancer
 import (
 	"net"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
 type Upstream struct {
-	Addr  string
-	alive bool
-	mu    sync.RWMutex
+	Addr        string
+	alive       bool
+	mu          sync.RWMutex
+	connections int64
 }
 
 func NewUpstream(addr string) *Upstream {
@@ -40,4 +42,16 @@ func (u *Upstream) CheckHealth() {
 	}
 	conn.Close()
 	u.SetAlive(true)
+}
+
+func (u *Upstream) Connections() int64 {
+	return atomic.LoadInt64(&u.connections)
+}
+
+func (u *Upstream) IncrConnections() {
+	atomic.AddInt64(&u.connections, 1)
+}
+
+func (u *Upstream) DecrConnections() {
+	atomic.AddInt64(&u.connections, -1)
 }
