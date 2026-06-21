@@ -7,12 +7,14 @@ import (
 	"os"
 	"reverse-proxy/server"
 	"strings"
+	"time"
 )
 
 type Args struct {
 	id         string
 	port       string
 	echoHeader bool
+	delay      time.Duration
 }
 
 func main() {
@@ -24,7 +26,7 @@ func main() {
 		addr = ":" + args.port
 	}
 
-	srv := server.NewHTTPServer(addr, &UpstreamHandler{Id: args.id, EchoHeader: args.echoHeader})
+	srv := server.NewHTTPServer(addr, &UpstreamHandler{Id: args.id, EchoHeader: args.echoHeader, Delay: args.delay})
 
 	if err := srv.ListenAndServe(); err != nil {
 		slog.Error("server failed", "err", err)
@@ -36,6 +38,7 @@ func parseArgs() Args {
 	id := flag.String("id", "upstream-1", "接続先のアドレス")
 	port := flag.String("port", "8080", "サーバーのポート")
 	echoHeader := flag.Bool("echo-header", true, "")
+	delay := flag.Duration("delay", 0, "レスポンス遅延")
 
 	flag.Parse()
 
@@ -43,12 +46,14 @@ func parseArgs() Args {
 		id:         *id,
 		port:       *port,
 		echoHeader: *echoHeader,
+		delay:      *delay,
 	}
 }
 
 type UpstreamHandler struct {
 	Id         string
 	EchoHeader bool
+	Delay      time.Duration
 }
 
 func (r *UpstreamHandler) ServerHTTP(req server.Request, write server.Write) {
@@ -58,6 +63,6 @@ func (r *UpstreamHandler) ServerHTTP(req server.Request, write server.Write) {
 		}
 	}
 
+	time.Sleep(r.Delay)
 	write(server.StatusOK, "Hello, "+r.Id+"!")
 }
-

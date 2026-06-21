@@ -12,23 +12,6 @@ type RoundRobin struct {
 	counter   uint64
 }
 
-func NewRoundRobin(strUpstreams []string, interval time.Duration) (Balancer, error) {
-	if len(strUpstreams) == 0 {
-		return nil, errors.New("upstreams must not be empty")
-	}
-
-	upstreams := make([]*Upstream, len(strUpstreams))
-	for i, addr := range strUpstreams {
-		upstreams[i] = NewUpstream(addr)
-	}
-
-	return &RoundRobin{
-		upstreams: upstreams,
-		interval:  interval,
-		counter:   0,
-	}, nil
-}
-
 func (r *RoundRobin) Next() (string, error) {
 	for i := 0; i < len(r.upstreams); i++ {
 		n := atomic.AddUint64(&r.counter, 1)
