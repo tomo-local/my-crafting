@@ -8,7 +8,7 @@ Building a reverse proxy and load balancer from scratch to understand request fo
 
 ## Goals
 
-- Forward HTTP requests to upstream servers
-- Load balancing strategies: Round Robin, Least Connections, IP Hash
-- Health checks for upstream servers
-- Connection pooling
+- [x] Forward HTTP requests to upstream servers
+- [x] Load balancing strategies: Round Robin, Least Connections
+- [x] Health checks for upstream servers
+- [x] Connection pooling
