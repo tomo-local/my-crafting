@@ -20,7 +20,7 @@ func NewUpstream(addr string, maxIdle int) *Upstream {
 	return &Upstream{
 		Addr:  addr,
 		alive: true,
-		Pool:  pool.NewConnPool(addr, 10),
+		Pool:  pool.NewConnPool(addr, maxIdle),
 	}
 }
 

@@ -10,9 +10,9 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"strconv"
 	lb "reverse-proxy/balancer"
 	"reverse-proxy/server"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -30,7 +30,7 @@ func parseArgs() Args {
 	upstreamsFlag := flag.String("upstreams", "localhost:9001,localhost:9002", "接続先のアドレス")
 	interval := flag.Int64("interval", 10, "ヘルスチェックのインターバル")
 	b := flag.Int64("balancer", 0, "バランシングを使うのか(0:RoundRobin,1:LeastConn)")
-	maxIdle := flag.Int("pool-size", 10, "")
+	maxIdle := flag.Int("pool-size", 10, "アップストリームごとのアイドル接続プールの最大数")
 
 	flag.Parse()
 
