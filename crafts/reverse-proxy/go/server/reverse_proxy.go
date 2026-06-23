@@ -59,7 +59,7 @@ func (s *ReverseProxyServer) serveConn(conn net.Conn) {
 		}
 
 		ok := func() bool {
-			upstreamConn, err := net.Dial("tcp", upstream)
+			upstreamConn, err := upstream.Pool.Get()
 			if err != nil {
 				slog.Error("failed to connect upstream", "upstream",
 					upstream, "err", err)
@@ -70,9 +70,9 @@ func (s *ReverseProxyServer) serveConn(conn net.Conn) {
 			}
 
 			req.Host = "upstream"
-			req.Header.Set("Host", upstream)
+			req.Header.Set("Host", upstream.Addr)
 
-			defer upstreamConn.Close()
+			defer upstream.Pool.Put(upstreamConn)
 			s.Handler.ServerReverseProxy(req, conn, upstreamConn)
 			return true
 		}()

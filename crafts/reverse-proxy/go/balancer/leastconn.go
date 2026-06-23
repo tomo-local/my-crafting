@@ -9,9 +9,10 @@ import (
 type LeastConn struct {
 	upstreams []*Upstream
 	interval  time.Duration
+	maxIdle   int
 }
 
-func (lc *LeastConn) Next() (string, error) {
+func (lc *LeastConn) Next() (*Upstream, error) {
 	var candidate *Upstream
 	minConn := int64(math.MaxInt64)
 
@@ -28,9 +29,10 @@ func (lc *LeastConn) Next() (string, error) {
 	}
 
 	if candidate == nil {
-		return "", errors.New("no alive upstream")
+		return nil, errors.New("no alive upstream")
 	}
-	return candidate.Addr, nil
+
+	return candidate, nil
 }
 
 func (lc *LeastConn) StartHealthCheck() {

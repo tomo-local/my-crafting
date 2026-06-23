@@ -2,6 +2,7 @@ package balancer
 
 import (
 	"net"
+	"reverse-proxy/pool"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -12,12 +13,14 @@ type Upstream struct {
 	alive       bool
 	mu          sync.RWMutex
 	connections int64
+	Pool        *pool.ConnPool
 }
 
-func NewUpstream(addr string) *Upstream {
+func NewUpstream(addr string, maxIdle int) *Upstream {
 	return &Upstream{
 		Addr:  addr,
 		alive: true,
+		Pool:  pool.NewConnPool(addr, maxIdle),
 	}
 }
 

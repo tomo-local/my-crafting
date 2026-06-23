@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"io"
@@ -11,6 +12,7 @@ import (
 	"os"
 	lb "reverse-proxy/balancer"
 	"reverse-proxy/server"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -20,6 +22,7 @@ type Args struct {
 	port      string
 	interval  int64
 	balancer  int64
+	maxIdle   int
 }
 
 func parseArgs() Args {
@@ -27,6 +30,7 @@ func parseArgs() Args {
 	upstreamsFlag := flag.String("upstreams", "localhost:9001,localhost:9002", "接続先のアドレス")
 	interval := flag.Int64("interval", 10, "ヘルスチェックのインターバル")
 	b := flag.Int64("balancer", 0, "バランシングを使うのか(0:RoundRobin,1:LeastConn)")
+	maxIdle := flag.Int("pool-size", 10, "アップストリームごとのアイドル接続プールの最大数")
 
 	flag.Parse()
 
@@ -41,6 +45,7 @@ func parseArgs() Args {
 		upstreams: upstreams,
 		interval:  *interval,
 		balancer:  *b,
+		maxIdle:   *maxIdle,
 	}
 }
 
@@ -53,7 +58,7 @@ func main() {
 		addr = ":" + args.port
 	}
 	interval := time.Duration(args.interval) * time.Second
-	balancer, err := lb.NewBalancer(lb.Kind(args.balancer), args.upstreams, interval)
+	balancer, err := lb.NewBalancer(lb.Kind(args.balancer), args.upstreams, interval, args.maxIdle)
 
 	if err != nil {
 		slog.Error("failed to create balancer", "err", err)
@@ -83,13 +88,41 @@ func (r *ReverseProxyHandler) ServerReverseProxy(req server.Request, conn net.Co
 
 	done := make(chan struct{}, 2)
 	go func() {
-		io.Copy(upstreamConn, req.Body)
-		upstreamConn.(*net.TCPConn).CloseWrite()
+		io.Copy(upstreamConn, io.LimitReader(req.Body, int64(req.ContentLength)))
 		done <- struct{}{}
 	}()
 
 	go func() {
-		io.Copy(conn, upstreamConn)
+		reader := bufio.NewReader(upstreamConn)
+
+		statusLine, err := reader.ReadString('\n')
+		if err != nil {
+			done <- struct{}{}
+			return
+		}
+		conn.Write([]byte(statusLine))
+
+		contentLength := 0
+		for {
+			line, err := reader.ReadString('\n')
+			if err != nil {
+				done <- struct{}{}
+				return
+			}
+			conn.Write([]byte(line))
+			if line == "\r\n" {
+				break
+			}
+			lower := strings.ToLower(line)
+			if strings.HasPrefix(lower, "content-length:") {
+				parts := strings.SplitN(line, ":", 2)
+				if len(parts) == 2 {
+					contentLength, _ = strconv.Atoi(strings.TrimSpace(parts[1]))
+				}
+			}
+		}
+
+		io.Copy(conn, io.LimitReader(reader, int64(contentLength)))
 		done <- struct{}{}
 	}()
 	<-done
