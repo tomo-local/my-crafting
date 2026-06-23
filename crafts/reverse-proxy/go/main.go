@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strconv"
 	lb "reverse-proxy/balancer"
 	"reverse-proxy/server"
 	"strings"
@@ -86,12 +88,41 @@ func (r *ReverseProxyHandler) ServerReverseProxy(req server.Request, conn net.Co
 
 	done := make(chan struct{}, 2)
 	go func() {
-		io.Copy(upstreamConn, req.Body)
+		io.Copy(upstreamConn, io.LimitReader(req.Body, int64(req.ContentLength)))
 		done <- struct{}{}
 	}()
 
 	go func() {
-		io.Copy(conn, upstreamConn)
+		reader := bufio.NewReader(upstreamConn)
+
+		statusLine, err := reader.ReadString('\n')
+		if err != nil {
+			done <- struct{}{}
+			return
+		}
+		conn.Write([]byte(statusLine))
+
+		contentLength := 0
+		for {
+			line, err := reader.ReadString('\n')
+			if err != nil {
+				done <- struct{}{}
+				return
+			}
+			conn.Write([]byte(line))
+			if line == "\r\n" {
+				break
+			}
+			lower := strings.ToLower(line)
+			if strings.HasPrefix(lower, "content-length:") {
+				parts := strings.SplitN(line, ":", 2)
+				if len(parts) == 2 {
+					contentLength, _ = strconv.Atoi(strings.TrimSpace(parts[1]))
+				}
+			}
+		}
+
+		io.Copy(conn, io.LimitReader(reader, int64(contentLength)))
 		done <- struct{}{}
 	}()
 	<-done
