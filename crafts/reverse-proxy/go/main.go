@@ -20,6 +20,7 @@ type Args struct {
 	port      string
 	interval  int64
 	balancer  int64
+	maxIdle   int
 }
 
 func parseArgs() Args {
@@ -27,6 +28,7 @@ func parseArgs() Args {
 	upstreamsFlag := flag.String("upstreams", "localhost:9001,localhost:9002", "接続先のアドレス")
 	interval := flag.Int64("interval", 10, "ヘルスチェックのインターバル")
 	b := flag.Int64("balancer", 0, "バランシングを使うのか(0:RoundRobin,1:LeastConn)")
+	maxIdle := flag.Int("pool-size", 10, "")
 
 	flag.Parse()
 
@@ -41,6 +43,7 @@ func parseArgs() Args {
 		upstreams: upstreams,
 		interval:  *interval,
 		balancer:  *b,
+		maxIdle:   *maxIdle,
 	}
 }
 
@@ -53,7 +56,7 @@ func main() {
 		addr = ":" + args.port
 	}
 	interval := time.Duration(args.interval) * time.Second
-	balancer, err := lb.NewBalancer(lb.Kind(args.balancer), args.upstreams, interval)
+	balancer, err := lb.NewBalancer(lb.Kind(args.balancer), args.upstreams, interval, args.maxIdle)
 
 	if err != nil {
 		slog.Error("failed to create balancer", "err", err)
@@ -84,7 +87,6 @@ func (r *ReverseProxyHandler) ServerReverseProxy(req server.Request, conn net.Co
 	done := make(chan struct{}, 2)
 	go func() {
 		io.Copy(upstreamConn, req.Body)
-		upstreamConn.(*net.TCPConn).CloseWrite()
 		done <- struct{}{}
 	}()
 
