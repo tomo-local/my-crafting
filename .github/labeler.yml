@@ -36,6 +36,10 @@ rate-limiter:
   - changed-files:
       - any-glob-to-any-file: "crafts/rate-limiter/**"
 
+pub-sub:
+  - changed-files:
+      - any-glob-to-any-file: "crafts/pub-sub/**"
+
 react-mini-jotai:
   - changed-files:
       - any-glob-to-any-file: "crafts/react-mini-jotai/**"
