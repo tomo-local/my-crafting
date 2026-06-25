@@ -21,6 +21,12 @@ func main() {
 
 実行するたびに出力順序が変わる。どちらが先に実行されるかは保証されない。
 
+### コメント
+
+実際に実行したら、出力順序に変化はないことが多いい。理由としては、goroutineの起動のタイミングとmainの処理の速さの関係で、mainが先に出力されることが多いからである。
+なので、goroutineの起動のタイミングの調整のため、 `time.Sleep` で 少し待つように対応した。
+
+
 ---
 
 ## data race とは
@@ -58,8 +64,8 @@ go run -race main.go
 # DATA RACE が検出される
 ```
 
-> **`sync.WaitGroup` とは**  
-> `wg.Add(n)` で「n 個の goroutine を待つ」、`wg.Done()` で「1つ完了」を通知する。  
+> **`sync.WaitGroup` とは**
+> `wg.Add(n)` で「n 個の goroutine を待つ」、`wg.Done()` で「1つ完了」を通知する。
 > `wg.Wait()` は全員が `Done` を呼ぶまでブロックする。goroutine の完了を確実に待ちたいときに使う。
 
 ---
