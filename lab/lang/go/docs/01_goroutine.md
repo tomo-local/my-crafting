@@ -21,6 +21,12 @@ func main() {
 
 実行するたびに出力順序が変わる。どちらが先に実行されるかは保証されない。
 
+### コメント
+
+実際に実行したら、出力順序に変化はないことが多いい。理由としては、goroutineの起動のタイミングとmainの処理の速さの関係で、mainが先に出力されることが多いからである。
+なので、goroutineの起動のタイミングの調整のため、 `time.Sleep` で 少し待つように対応して、どちらが出力されるのかは、実行するたびに変化するようになった。
+
+
 ---
 
 ## data race とは
@@ -58,9 +64,58 @@ go run -race main.go
 # DATA RACE が検出される
 ```
 
-> **`sync.WaitGroup` とは**  
-> `wg.Add(n)` で「n 個の goroutine を待つ」、`wg.Done()` で「1つ完了」を通知する。  
+> **`sync.WaitGroup` とは**
+> `wg.Add(n)` で「n 個の goroutine を待つ」、`wg.Done()` で「1つ完了」を通知する。
 > `wg.Wait()` は全員が `Done` を呼ぶまでブロックする。goroutine の完了を確実に待ちたいときに使う。
+
+
+### コメント
+
+実際に出力されたエラー
+
+```
+❯ go run -race main.go
+==================
+WARNING: DATA RACE
+Read at 0x00c00010e038 by goroutine 13:
+  main.main.func1()
+      /Users/tomo/Local/my-crafting/lab/lang/go/src/main.go:17 +0x68
+
+Previous write at 0x00c00010e038 by goroutine 7:
+  main.main.func1()
+      /Users/tomo/Local/my-crafting/lab/lang/go/src/main.go:17 +0x78
+
+Goroutine 13 (running) created at:
+  main.main()
+      /Users/tomo/Local/my-crafting/lab/lang/go/src/main.go:15 +0x6c
+
+Goroutine 7 (finished) created at:
+  main.main()
+      /Users/tomo/Local/my-crafting/lab/lang/go/src/main.go:15 +0x6c
+==================
+==================
+WARNING: DATA RACE
+Write at 0x00c00010e038 by goroutine 23:
+  main.main.func1()
+      /Users/tomo/Local/my-crafting/lab/lang/go/src/main.go:17 +0x78
+
+Previous write at 0x00c00010e038 by goroutine 22:
+  main.main.func1()
+      /Users/tomo/Local/my-crafting/lab/lang/go/src/main.go:17 +0x78
+
+Goroutine 23 (running) created at:
+  main.main()
+      /Users/tomo/Local/my-crafting/lab/lang/go/src/main.go:15 +0x6c
+
+Goroutine 22 (running) created at:
+  main.main()
+      /Users/tomo/Local/my-crafting/lab/lang/go/src/main.go:15 +0x6c
+==================
+883
+Found 2 data race(s)
+exit status 66
+```
+
 
 ---
 
