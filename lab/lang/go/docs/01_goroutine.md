@@ -68,6 +68,55 @@ go run -race main.go
 > `wg.Add(n)` で「n 個の goroutine を待つ」、`wg.Done()` で「1つ完了」を通知する。
 > `wg.Wait()` は全員が `Done` を呼ぶまでブロックする。goroutine の完了を確実に待ちたいときに使う。
 
+
+### コメント
+
+実際に出力されたエラー
+
+```
+❯ go run -race main.go
+==================
+WARNING: DATA RACE
+Read at 0x00c00010e038 by goroutine 13:
+  main.main.func1()
+      /Users/tomo/Local/my-crafting/lab/lang/go/src/main.go:17 +0x68
+
+Previous write at 0x00c00010e038 by goroutine 7:
+  main.main.func1()
+      /Users/tomo/Local/my-crafting/lab/lang/go/src/main.go:17 +0x78
+
+Goroutine 13 (running) created at:
+  main.main()
+      /Users/tomo/Local/my-crafting/lab/lang/go/src/main.go:15 +0x6c
+
+Goroutine 7 (finished) created at:
+  main.main()
+      /Users/tomo/Local/my-crafting/lab/lang/go/src/main.go:15 +0x6c
+==================
+==================
+WARNING: DATA RACE
+Write at 0x00c00010e038 by goroutine 23:
+  main.main.func1()
+      /Users/tomo/Local/my-crafting/lab/lang/go/src/main.go:17 +0x78
+
+Previous write at 0x00c00010e038 by goroutine 22:
+  main.main.func1()
+      /Users/tomo/Local/my-crafting/lab/lang/go/src/main.go:17 +0x78
+
+Goroutine 23 (running) created at:
+  main.main()
+      /Users/tomo/Local/my-crafting/lab/lang/go/src/main.go:15 +0x6c
+
+Goroutine 22 (running) created at:
+  main.main()
+      /Users/tomo/Local/my-crafting/lab/lang/go/src/main.go:15 +0x6c
+==================
+883
+Found 2 data race(s)
+exit status 66
+```
+
+
 ---
 
 ## まとめ
