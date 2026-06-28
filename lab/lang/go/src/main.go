@@ -6,24 +6,48 @@ import (
 	"time"
 )
 
+type Cache struct {
+	mu   sync.RWMutex
+	data map[string]string
+}
+
+func (c *Cache) Set(key, value string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.data[key] = value
+}
+
+func (c *Cache) Get(key string) string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	value, ok := c.data[key]
+	if !ok {
+		return ""
+	}
+	return value
+}
+
 func main() {
-	var mu sync.Mutex
-	counter := 0
+	cache := &Cache{data: make(map[string]string)}
+	cache.Set("name", "Alice")
+
 	var wg sync.WaitGroup
 
 	for i := 0; i < 1000; i++ {
 		wg.Add(1)
-
-		go func() {
+		go func(n int) {
 			defer wg.Done()
-			mu.Lock()
-			counter++
-			mu.Unlock()
-		}()
+			v := cache.Get("name")
+			fmt.Println(v)
+			fmt.Printf("goroutine %d: %s\n", n, v)
+		}(i)
 	}
 
+	time.Sleep(1 * time.Millisecond)
+	cache.Set("name", "Bob")
+
 	wg.Wait()
-	fmt.Println(counter)
+	fmt.Println("done")
 }
 
 // ## goroutine
@@ -48,6 +72,26 @@ func waitGroup() {
 			defer wg.Done()
 			counter++
 
+		}()
+	}
+
+	wg.Wait()
+	fmt.Println(counter)
+}
+
+func waitGroupWithLock() {
+	var mu sync.Mutex
+	counter := 0
+	var wg sync.WaitGroup
+
+	for i := 0; i < 1000; i++ {
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+			mu.Lock()
+			counter++
+			mu.Unlock()
 		}()
 	}
 
