@@ -54,10 +54,8 @@ func main() {
 func handleClient(conn net.Conn, b *broker.Broker) {
 	defer conn.Close()
 	sub := broker.NewSubscriber(conn)
-
-	go writeLoop(sub)
 	readLoop(sub, b)
-	close(sub.Messages())
+	b.UnsubscribeAll(sub)
 }
 
 func readLoop(sub *broker.Subscriber, b *broker.Broker) {
@@ -78,8 +76,13 @@ func readLoop(sub *broker.Subscriber, b *broker.Broker) {
 				continue
 			}
 			topic := fields[1]
-			sub.SetTopic(topic)
-			b.Subscribe(topic, sub)
+			ch := b.Subscribe(topic, sub)
+			go writeLoop(topic, ch, sub.Conn())
+			fmt.Fprintf(sub.Conn(), "+OK\r\n")
+
+		case "UNSUB":
+			topic := fields[1]
+			b.Unsubscribe(topic, sub)
 			fmt.Fprintf(sub.Conn(), "+OK\r\n")
 
 		case "PUB":
@@ -98,10 +101,8 @@ func readLoop(sub *broker.Subscriber, b *broker.Broker) {
 	}
 }
 
-func writeLoop(sub *broker.Subscriber) {
-	for msg := range sub.Messages() {
-		if _, err := fmt.Fprintf(sub.Conn(), "MSG %s %s\r\n", sub.Topic(), msg); err != nil {
-			return
-		}
+func writeLoop(topic string, ch chan string, conn net.Conn) {
+	for msg := range ch {
+		fmt.Fprintf(conn, "MSG %s %s\r\n", topic, msg)
 	}
 }
