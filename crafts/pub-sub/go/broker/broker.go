@@ -1,7 +1,9 @@
 package broker
 
 import (
+	"log"
 	"sync"
+	"sync/atomic"
 )
 
 type Broker struct {
@@ -71,7 +73,16 @@ func (b *Broker) Publish(topic string, message string) {
 		subscription, ok := sub.subscriptions[topic]
 		sub.mu.Unlock()
 		if ok {
-			subscription.ch <- message
+			select {
+			case subscription.ch <- message:
+			default:
+				dropped := atomic.AddInt64(&sub.dropped, 1)
+				if dropped%100 == 0 {
+					log.Printf("[WARN] %s topic=%s dropped=%d",
+						sub.conn.RemoteAddr(), topic, dropped)
+				}
+			}
+
 		}
 	}
 }
