@@ -9,6 +9,7 @@ type Subscriber struct {
 	conn          net.Conn
 	mu            sync.Mutex
 	subscriptions map[string]*Subscription
+	dropped       int64
 }
 
 func NewSubscriber(conn net.Conn) *Subscriber {
