@@ -87,3 +87,7 @@ gameboy-emulator:
 firestore:
   - changed-files:
       - any-glob-to-any-file: "crafts/firestore/**"
+
+orm:
+  - changed-files:
+      - any-glob-to-any-file: "crafts/orm/**"
