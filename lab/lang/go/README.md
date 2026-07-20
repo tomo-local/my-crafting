@@ -6,6 +6,7 @@ Go の各トピックを手を動かして学ぶ。
 
 | Directory | 内容 |
 |-----------|------|
+| [basic](./basic) | 変数・型・関数・制御フロー・スライス・マップ |
 | [concurrency](./concurrency) | goroutine / sync.Mutex / sync.RWMutex |
 
 ## Setup
