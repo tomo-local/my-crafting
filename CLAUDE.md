@@ -29,6 +29,7 @@ git submodule update --remote <path>
 | ディレクトリ | 役割 |
 |---|---|
 | `crafts/` | ゼロから作るシステム実装 |
+| `made/` | 実際に使うために作ったツール（git submodule）|
 | `lab/lang/` | 言語学習リポジトリ（git submodule）|
 | `lab/lib/` | ライブラリ/ランタイム学習（git submodule）|
 | `lab/infra/` | インフラ演習（Kubernetes break-fix）|

@@ -29,6 +29,14 @@ Each topic is organized by directory and may include multiple language implement
 | [Kafka Clone](./crafts/kafka-clone) | Go | Planned |
 | [Game Boy Emulator](./crafts/gameboy-emulator) | Go | Planned |
 
+## Made
+
+Tools built for actual use.
+
+| Tool | Repo | Description |
+|------|------|-------------|
+| [habit-tracker](./made/habit-tracker) | [habit-tracker](https://github.com/tomo-local/habit-tracker) | Google カレンダーで習慣を記録する CLI |
+
 ## Lab
 
 ### Languages
@@ -73,6 +81,8 @@ my-crafting/
 │   ├── distributed-cache/
 │   ├── search-engine/
 │   └── kafka-clone/
+├── made/
+│   └── habit-tracker/
 ├── lab/
 │   ├── lang/
 │   │   ├── haskell/
