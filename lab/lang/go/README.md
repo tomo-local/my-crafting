@@ -1,15 +1,18 @@
 # Go
 
-Go の並行処理（goroutine・channel・sync）を中心に学ぶ。
+Go の各トピックを手を動かして学ぶ。
 
-## Structure
+## Topics
 
-| Directory | Topics |
-|-----------|--------|
-| [docs](./docs) | goroutine / sync.Mutex / sync.RWMutex |
+| Directory | 内容 |
+|-----------|------|
+| [concurrency](./concurrency) | goroutine / sync.Mutex / sync.RWMutex |
 
 ## Setup
 
+各トピックディレクトリに `mise.toml` がある。
+
 ```bash
-go version   # 1.25 以上であれば ok
+cd concurrency
+mise exec -- go run main.go
 ```
