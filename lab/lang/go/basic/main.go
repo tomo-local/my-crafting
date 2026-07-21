@@ -1,11 +1,76 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+)
 
 const LINE_BRAKE string = "\r\n"
 
 func main() {
-	study_functions()
+	study_control_flow()
+}
+
+// 03_control_flow.md
+func study_control_flow() {
+	if x := rand.Int(); x > 0 {
+		fmt.Println("positive: ", x)
+	} else {
+		fmt.Println("negative: ", x)
+	}
+
+	// normal loop
+	for i := 0; i < 10; i++ {
+		fmt.Println("count: ", i)
+	}
+
+	// white loop
+	n := 1
+	for n < 100 {
+		n *= 10
+		fmt.Println("num: ", n)
+	}
+
+	// infinity loop
+	b := 0
+	for {
+		b++
+		if b == 10 {
+			fmt.Println("break point: ", b)
+			break
+		}
+	}
+
+	if result, err := check_weekend("Saturday"); err == nil {
+		fmt.Println("weekend: ", result)
+	} else {
+		fmt.Println(err)
+	}
+
+	if result, err := check_weekend("Monday"); err == nil {
+		fmt.Println("weekend: ", result)
+	} else {
+		fmt.Println(err)
+	}
+
+	if result, err := check_weekend("Mondy"); err == nil {
+		fmt.Println("weekend: ", result)
+	} else {
+		fmt.Println(err)
+	}
+}
+
+func check_weekend(day string) (bool, error) {
+	defer fmt.Println("input: ", day)
+
+	switch day {
+	case "Saturday", "Sunday":
+		return true, nil
+	case "Monday", "Tuesday", "Wednesday", "Thursday", "Friday":
+		return false, nil
+	default:
+		return false, fmt.Errorf("not a day of the week.")
+	}
 }
 
 // 02_functions.md
