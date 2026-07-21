@@ -5,6 +5,44 @@ import "fmt"
 const LINE_BRAKE string = "\r\n"
 
 func main() {
+	study_functions()
+}
+
+// 02_functions.md
+func study_functions() {
+	a := 1
+	b := 2
+
+	fmt.Printf("add: 1+2=%d%s", add(a, b), LINE_BRAKE)
+
+	if result, err := divide(10, 5); err != nil {
+		fmt.Println("error:", err)
+	} else {
+		fmt.Printf("divide: 10/5=%f%s", result, LINE_BRAKE)
+	}
+
+	if result, err := divide(100, 0); err != nil {
+		fmt.Println("error:", err)
+	} else {
+		fmt.Printf("divide: 100/0=%f%s", result, LINE_BRAKE)
+	}
+}
+
+func add(a, b int) int {
+	return a + b
+}
+
+func divide(a, b float64) (float64, error) {
+	if b == 0 {
+		return 0, fmt.Errorf("division by zero")
+	}
+
+	return a / b, nil
+}
+
+// 01_types.md
+
+func study_types() {
 	age := 30
 	john := &Human{
 		name: "John Done",
