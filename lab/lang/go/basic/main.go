@@ -8,7 +8,68 @@ import (
 const LINE_BRAKE string = "\r\n"
 
 func main() {
-	study_control_flow()
+	study_collections()
+}
+
+// 04_collections.md
+func study_collections() {
+	study_slice_and_array()
+	study_map()
+}
+
+func study_slice_and_array() {
+	// Array
+	nums_array := [3]int{1, 2, 3}
+	nums_array_copy := nums_array
+	fmt.Println("nums_array: ", &nums_array[0])
+	fmt.Println("nums_array_copy: ", &nums_array_copy[0])
+	// false
+	fmt.Println("eq origin to copy: ", &nums_array[0] == &nums_array_copy[0])
+
+	// Slice
+	nums_slice := []int{1, 2, 3}
+	nums_slice_copy := nums_slice
+	fmt.Println("nums_slice[0]: ", &nums_slice[0])
+	fmt.Println("nums_slice_copy[0]: ", &nums_slice_copy[0])
+	// true
+	fmt.Println("eq origin to copy: ", &nums_slice[0] == &nums_slice_copy[0])
+
+	nums_slice = append(nums_slice, 4, 5)
+	nums_slice[0] = 0
+	// 0,2,3,4,5
+	fmt.Println("nums_slice: ", nums_slice)
+	fmt.Println("nums_slice[0]: ", &nums_slice[0])
+	// 1,2,3
+	fmt.Println("nums_slice_copy: ", nums_slice_copy)
+	fmt.Println("nums_slice_copy[0]: ", &nums_slice_copy[0])
+	// appendをすることで新しく別のメモリーを確保するため、falseになる
+	fmt.Println("eq origin to copy: ", &nums_slice[0] == &nums_slice_copy[0])
+
+	nums_slice_copy = nums_slice[:3]
+	// 参照するメモリーの位置が同じになるため、true
+	fmt.Println("eq origin to copy: ", &nums_slice[0] == &nums_slice_copy[0])
+
+	nums_slice[1] = 1
+	fmt.Println("nums_slice: ", nums_slice)
+	fmt.Println("nums_slice_copy: ", nums_slice_copy)
+
+	for i, v := range nums_slice_copy {
+		fmt.Printf("nums[%d] = %d%s", i, v, LINE_BRAKE)
+	}
+}
+
+func study_map() {
+	students := map[string]int{
+		"Bob":   18,
+		"Alice": 17,
+	}
+
+	fmt.Println("Bob ages:", students["Bob"])
+	fmt.Println("Alice ages:", students["Alice"])
+
+	if _, ok := students["John"]; !ok {
+		fmt.Println("John is unknown")
+	}
 }
 
 // 03_control_flow.md
@@ -106,7 +167,6 @@ func divide(a, b float64) (float64, error) {
 }
 
 // 01_types.md
-
 func study_types() {
 	age := 30
 	john := &Human{
