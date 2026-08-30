@@ -5,19 +5,19 @@ import (
 )
 
 type KV struct {
-	log Log
+	Log Log
 	mem map[string][]byte
 }
 
 func (kv *KV) Open() error {
-	if err := kv.log.Open(); err != nil {
+	if err := kv.Log.Open(); err != nil {
 		return err
 	}
 
 	kv.mem = map[string][]byte{}
 	for {
 		ent := Entry{}
-		eof, err := kv.log.Read(&ent)
+		eof, err := kv.Log.Read(&ent)
 		if err != nil {
 			return err
 		}
@@ -35,7 +35,7 @@ func (kv *KV) Open() error {
 	return nil
 }
 
-func (kv *KV) Close() error { return kv.log.Close() }
+func (kv *KV) Close() error { return kv.Log.Close() }
 
 // 取得
 func (kv *KV) Get(key []byte) ([]byte, bool, error) {
@@ -67,7 +67,7 @@ func (kv *KV) SetEx(key []byte, val []byte, mode UpdateMode) (bool, error) {
 	}
 
 	if updated {
-		if err := kv.log.Write(&Entry{key: key, val: val}); err != nil {
+		if err := kv.Log.Write(&Entry{key: key, val: val}); err != nil {
 			return false, err
 		}
 		kv.mem[string(key)] = val
@@ -85,7 +85,7 @@ func (kv *KV) Set(key []byte, val []byte) (bool, error) {
 func (kv *KV) Del(key []byte) (bool, error) {
 	_, deleted := kv.mem[string(key)]
 	if deleted {
-		if err := kv.log.Write(&Entry{key: key, deleted: true}); err != nil {
+		if err := kv.Log.Write(&Entry{key: key, deleted: true}); err != nil {
 			return false, err
 		}
 		delete(kv.mem, string(key))

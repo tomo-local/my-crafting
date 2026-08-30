@@ -9,10 +9,10 @@ import (
 
 func TestKVBasic(t *testing.T) {
 	kv := KV{}
-	kv.log.FileName = ".test_db"
-	defer os.Remove(kv.log.FileName)
+	kv.Log.FileName = ".test_db"
+	defer os.Remove(kv.Log.FileName)
 
-	os.Remove(kv.log.FileName)
+	os.Remove(kv.Log.FileName)
 	err := kv.Open()
 	assert.Nil(t, err)
 	defer kv.Close()
