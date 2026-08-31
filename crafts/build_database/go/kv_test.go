@@ -106,6 +106,12 @@ func TestKV_Del(t *testing.T) {
 			if deleted != tt.wantDeleted {
 				t.Errorf("Del() = %v, want %v", deleted, tt.wantDeleted)
 			}
+
+			if _, ok, err := kv.Get(tt.key); err != nil {
+				t.Fatalf("Get() error = %v", err)
+			} else if ok {
+				t.Errorf("Get() ok = true after Del(), want false")
+			}
 		})
 	}
 }
