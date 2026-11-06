@@ -13,6 +13,10 @@ type User struct {
 	Age  int64  `json:"age"`
 }
 
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
 var users = []*User{
 	{ID: "user_0001", Name: "Bob", Age: 28},
 	{ID: "user_0003", Name: "Alice", Age: 18},
@@ -42,7 +46,7 @@ func main() {
 		}
 
 		w.WriteHeader(http.StatusNotFound)
-		if err := json.NewEncoder(w).Encode(`{"error": "user not found."}`); err != nil {
+		if err := json.NewEncoder(w).Encode(ErrorResponse{Error: "user not found"}); err != nil {
 			log.Println("encode error:", err)
 		}
 	})
